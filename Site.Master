@@ -1,0 +1,62 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.Master.cs" Inherits="LasDeliciasERP.SiteMaster" %>
+
+<!DOCTYPE html>
+<html lang="es">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%: Page.Title %> - LasDeliciasERP</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <asp:PlaceHolder runat="server"> 
+        <link href="~/Styles/site.css" rel="stylesheet" /> 
+    </asp:PlaceHolder>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <!-- Navbar superior -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="Dashboard.aspx">LasDeliciasERP</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarMenu">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="EggProductionList.aspx">
+                                <i class="bi bi-egg-fill"></i> Producción de Huevos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="FeedExpenses.aspx">
+                                <i class="bi bi-basket-fill"></i> Gastos de Concentrado
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="Vaccines.aspx">
+                                <i class="bi bi-heart-pulse-fill"></i> Vacunas
+                            </a>
+                        </li>
+                        <!-- Agregar más módulos según sea necesario -->
+                    </ul>
+                    <span class="navbar-text text-white">
+                        Usuario: <%-- Aquí puedes mostrar el nombre del usuario --%>
+                    </span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Menú tipo dashboard (tarjetas grandes) -->
+        <div class="container mt-4">
+            <asp:ContentPlaceHolder ID="MainContent" runat="server"></asp:ContentPlaceHolder>
+        </div>
+
+        <!-- Bootstrap JS y Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </form>
+</body>
+</html>
