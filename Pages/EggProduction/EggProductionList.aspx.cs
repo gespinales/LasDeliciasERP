@@ -1,14 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using LasDeliciasERP.AccesoADatos; 
+﻿using LasDeliciasERP.AccesoADatos; 
 using LasDeliciasERP.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.UI;
+using System.Web.UI.WebControls;
 
 namespace LasDeliciasERP.Pages.EggProduction
 {
     public partial class EggProductionList : System.Web.UI.Page
     {
         //objeto para el acceso a los datos
-        EggProductionDAL dalEggProduction = new EggProductionDAL(); 
+        EggProductionDAL dalEggProduction = new EggProductionDAL();
+        private List<Models.EggProduction> allProductions;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -35,45 +39,99 @@ namespace LasDeliciasERP.Pages.EggProduction
         private void BindGrid()
         {
             // Obtener todos los registros desde MySQL
-            GridViewEggProduction.DataSource = dalEggProduction.GetAll();
+            allProductions = dalEggProduction.GetAll();
+            ViewState["Productions"] = allProductions;
+
+            GridViewEggProduction.DataSource = allProductions;
             GridViewEggProduction.DataBind();
         }
 
         protected void GridViewEggProduction_PageIndexChanging(object sender, System.Web.UI.WebControls.GridViewPageEventArgs e)
         {
             GridViewEggProduction.PageIndex = e.NewPageIndex;
-            BindGrid();
+            GridViewEggProduction.DataSource = ViewState["Productions"];
+            GridViewEggProduction.DataBind();
         }
 
+        // Colores por TotalQuantity
         protected void GridViewEggProduction_RowDataBound(object sender, System.Web.UI.WebControls.GridViewRowEventArgs e)
         {
-            if (e.Row.RowType == System.Web.UI.WebControls.DataControlRowType.DataRow)
+            if (e.Row.RowType == DataControlRowType.DataRow)
             {
-                var item = e.Row.DataItem as Models.EggProduction;
-                if (item != null)
+                // Obtener el valor de TotalQuantity
+                int totalQty = Convert.ToInt32(DataBinder.Eval(e.Row.DataItem, "TotalQuantity"));
+
+                // Asignar color de fondo según la cantidad
+                if (totalQty > 50)
                 {
-                    // Color según producción total
-                    if (item.TotalQuantity < 15)
-                        e.Row.CssClass = "low-production";
-                    else if (item.TotalQuantity > 25)
-                        e.Row.CssClass = "high-production";
+                    e.Row.CssClass = "table-success"; // verde claro
+                }
+                else if (totalQty >= 20 && totalQty <= 50)
+                {
+                    e.Row.CssClass = "table-warning"; // amarillo claro
+                }
+                else
+                {
+                    e.Row.CssClass = "table-danger";  // rojo claro
                 }
             }
         }
 
         protected void btnEdit_Click(object sender, EventArgs e)
         {
-            var btn = (System.Web.UI.WebControls.Button)sender;
+            LinkButton btn = (LinkButton)sender;
             int id = int.Parse(btn.CommandArgument);
 
             Response.Redirect($"EggProductionForm.aspx?id={id}");
         }
 
-        //protected void btnDelete_Click(object sender, EventArgs e)
-        //{
-        //    var btn = (System.Web.UI.WebControls.Button)sender;
-        //    int id = int.Parse(btn.CommandArgument);
-        //    Response.Write($"Eliminar registro con ID: {id}");
-        //}
+        // Ordenamiento
+        protected void GridViewEggProduction_Sorting(object sender, GridViewSortEventArgs e)
+        {
+            allProductions = ViewState["Productions"] as List<Models.EggProduction>;
+            string sortExpression = e.SortExpression;
+            string direction = ViewState["SortDirection"] as string == "ASC" ? "DESC" : "ASC";
+            ViewState["SortDirection"] = direction;
+            ViewState["SortExpression"] = sortExpression;
+
+            if (direction == "ASC")
+                GridViewEggProduction.DataSource = allProductions.OrderBy(p => DataBinder.Eval(p, sortExpression)).ToList();
+            else
+                GridViewEggProduction.DataSource = allProductions.OrderByDescending(p => DataBinder.Eval(p, sortExpression)).ToList();
+
+            GridViewEggProduction.DataBind();
+        }
+
+        // Búsqueda
+        protected void btnSearch_Click(object sender, EventArgs e)
+        {
+            allProductions = ViewState["Productions"] as List<Models.EggProduction>;
+            var filtered = allProductions.AsEnumerable();
+
+            if (!string.IsNullOrEmpty(txtSearchDate.Text))
+            {
+                if (DateTime.TryParse(txtSearchDate.Text, out DateTime dt))
+                    filtered = filtered.Where(p => p.Date.Date == dt.Date);
+            }
+
+            if (!string.IsNullOrEmpty(txtSearchType.Text))
+                filtered = filtered.Where(p => !string.IsNullOrEmpty(p.EggTypeName) && p.EggTypeName.ToLower().Contains(txtSearchType.Text.ToLower()));
+
+            if (!string.IsNullOrEmpty(txtSearchNotes.Text))
+                filtered = filtered.Where(p => !string.IsNullOrEmpty(p.Notes) && p.Notes.ToLower().Contains(txtSearchNotes.Text.ToLower()));
+
+            GridViewEggProduction.DataSource = filtered.ToList();
+            GridViewEggProduction.DataBind();
+        }
+
+        protected void btnClear_Click(object sender, EventArgs e)
+        {
+            txtSearchDate.Text = "";
+            txtSearchType.Text = "";
+            txtSearchNotes.Text = "";
+
+            GridViewEggProduction.DataSource = ViewState["Productions"];
+            GridViewEggProduction.DataBind();
+        }
     }
 }

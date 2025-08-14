@@ -5,6 +5,7 @@ using System.Web;
 
 namespace LasDeliciasERP.Models
 {
+    [Serializable]
     public class EggProduction
     {
         public int Id { get; set; }
