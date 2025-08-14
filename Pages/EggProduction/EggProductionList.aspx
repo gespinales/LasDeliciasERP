@@ -25,6 +25,7 @@
                 <asp:BoundField DataField="TotalQuantity" HeaderText="Total Huevos" ItemStyle-CssClass="text-center" />
                 <asp:BoundField DataField="TotalWeight" HeaderText="Peso Total (g)" DataFormatString="{0:F2}" ItemStyle-CssClass="text-center" />
                 <asp:BoundField DataField="AverageWeight" HeaderText="Peso Promedio (g)" DataFormatString="{0:F2}" ItemStyle-CssClass="text-center" />
+                <asp:BoundField DataField="EggTypeName" HeaderText="Tipo de Huevo" ItemStyle-CssClass="text-center" />
                 <asp:BoundField DataField="Notes" HeaderText="Notas" ItemStyle-CssClass="text-center" />
 
                 <asp:TemplateField HeaderText="Acciones" ItemStyle-CssClass="text-center">

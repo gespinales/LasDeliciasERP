@@ -9,7 +9,7 @@ namespace LasDeliciasERP.Models
     {
         public int Id { get; set; }
         public DateTime Date { get; set; }
-
+        
         // Cantidad de huevos por categoría de tamaño
         public int QuantityS { get; set; }
         public int QuantityM { get; set; }
@@ -38,5 +38,10 @@ namespace LasDeliciasERP.Models
         public double AverageWeight => TotalQuantity > 0 ? TotalWeight / TotalQuantity : 0;
 
         public string Notes { get; set; }
+
+
+        // Vendrán de la tabla de tipos de huevos
+        public int EggTypeId { get; set; }      
+        public string EggTypeName { get; set; } 
     }
 }

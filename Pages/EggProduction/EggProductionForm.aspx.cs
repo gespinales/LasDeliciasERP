@@ -8,11 +8,16 @@ namespace LasDeliciasERP.Pages.EggProduction
     {
         //objeto para el acceso a los datos
         EggProductionDAL dalEggProduction = new EggProductionDAL();
+        EggTypeDAL dalEggType = new EggTypeDAL();
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
+                //Cargar primero la lista de valores de los tipos de huevos
+                LoadEggTypes(); 
+
+                //Se valida si viene de una creación o modificación
                 string idStr = Request.QueryString["id"];
                 if (!string.IsNullOrEmpty(idStr))
                 {
@@ -29,6 +34,17 @@ namespace LasDeliciasERP.Pages.EggProduction
             }
         }
 
+        private void LoadEggTypes()
+        {
+            var eggTypes = dalEggType.GetAll(); 
+            ddlEggType.DataSource = eggTypes;
+            ddlEggType.DataTextField = "Name";
+            ddlEggType.DataValueField = "Id";
+            ddlEggType.DataBind();
+
+            ddlEggType.Items.Insert(0, new System.Web.UI.WebControls.ListItem("-- Seleccione --", ""));
+        }
+
         private void LoadData(int id)
         {
             var production = dalEggProduction.GetById(id);
@@ -41,6 +57,7 @@ namespace LasDeliciasERP.Pages.EggProduction
                 txtL.Text = production.QuantityL.ToString();
                 txtXL.Text = production.QuantityXL.ToString();
                 txtNotes.Text = production.Notes;
+                ddlEggType.SelectedValue = production.EggTypeId.ToString();
             }
             else
             {
@@ -59,7 +76,8 @@ namespace LasDeliciasERP.Pages.EggProduction
                 QuantityM = string.IsNullOrEmpty(txtM.Text) ? 0 : int.Parse(txtM.Text),
                 QuantityL = string.IsNullOrEmpty(txtL.Text) ? 0 : int.Parse(txtL.Text),
                 QuantityXL = string.IsNullOrEmpty(txtXL.Text) ? 0 : int.Parse(txtXL.Text),
-                Notes = txtNotes.Text
+                Notes = txtNotes.Text,
+                EggTypeId = int.Parse(ddlEggType.SelectedValue)
             };
 
             if (!string.IsNullOrEmpty(hfId.Value))

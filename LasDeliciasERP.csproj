@@ -234,12 +234,14 @@
     <Content Include="Site.Mobile.Master" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccesoADatos\EggTypeDAL.cs" />
     <Compile Include="AccesoADatos\EggProductionDAL.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\EggType.cs" />
     <Compile Include="Models\EggSize.cs" />
     <Compile Include="Models\EggProduction.cs" />
     <Compile Include="Pages\Dashboard\Dashboard.aspx.cs">
