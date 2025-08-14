@@ -18,9 +18,10 @@ namespace LasDeliciasERP.AccesoADatos
             {
                 conn.Open();
                 string query = @"
-                    SELECT ep.*, et.Name AS EggTypeName
+                    SELECT ep.*, et.Name AS EggTypeName, b.Name AS BarnName
                     FROM EggProduction ep
                     JOIN EggType et ON ep.EggTypeId = et.Id
+                    JOIN Barn b ON ep.BarnId = b.Id
                     ORDER BY ep.Date DESC";
 
                 MySqlCommand cmd = new MySqlCommand(query, conn);
@@ -38,7 +39,9 @@ namespace LasDeliciasERP.AccesoADatos
                             QuantityXL = reader.GetInt32("QuantityXL"),
                             Notes = reader.GetString("Notes"),
                             EggTypeId = reader.GetInt32("EggTypeId"),
-                            EggTypeName = reader.GetString("EggTypeName")
+                            EggTypeName = reader.GetString("EggTypeName"),
+                            BarnId = reader.GetInt32("BarnId"),
+                            BarnName = reader.GetString("BarnName")
                         });
                     }
                 }
@@ -70,7 +73,8 @@ namespace LasDeliciasERP.AccesoADatos
                             QuantityL = reader.GetInt32("QuantityL"),
                             QuantityXL = reader.GetInt32("QuantityXL"),
                             Notes = reader.IsDBNull(reader.GetOrdinal("Notes")) ? "" : reader.GetString("Notes"),
-                            EggTypeId = reader.GetInt32("EggTypeId")
+                            EggTypeId = reader.GetInt32("EggTypeId"),
+                            BarnId = reader.GetInt32("BarnId")
                         };
                     }
                 }
@@ -83,8 +87,9 @@ namespace LasDeliciasERP.AccesoADatos
             using (MySqlConnection conn = new MySqlConnection(connString))
             {
                 conn.Open();
-                string query = @"INSERT INTO EggProduction (Date, QuantityS, QuantityM, QuantityL, QuantityXL, Notes, EggTypeId)
-                                 VALUES (@Date, @S, @M, @L, @XL, @Notes, @EggTypeId)";
+                string query = @"INSERT INTO EggProduction 
+                                 (Date, QuantityS, QuantityM, QuantityL, QuantityXL, Notes, EggTypeId, BarnId)
+                                 VALUES (@Date, @S, @M, @L, @XL, @Notes, @EggTypeId, @BarnId)";
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@Date", ep.Date);
                 cmd.Parameters.AddWithValue("@S", ep.QuantityS);
@@ -93,6 +98,7 @@ namespace LasDeliciasERP.AccesoADatos
                 cmd.Parameters.AddWithValue("@XL", ep.QuantityXL);
                 cmd.Parameters.AddWithValue("@Notes", ep.Notes);
                 cmd.Parameters.AddWithValue("@EggTypeId", ep.EggTypeId);
+                cmd.Parameters.AddWithValue("@BarnId", ep.BarnId);
                 cmd.ExecuteNonQuery();
             }
         }
@@ -110,7 +116,8 @@ namespace LasDeliciasERP.AccesoADatos
                         QuantityL = @L,
                         QuantityXL = @XL,
                         Notes = @Notes,
-                        EggTypeId = @EggTypeId
+                        EggTypeId = @EggTypeId,
+                        BarnId = @BarnId
                     WHERE Id = @Id";
 
                 MySqlCommand cmd = new MySqlCommand(query, conn);
@@ -121,6 +128,7 @@ namespace LasDeliciasERP.AccesoADatos
                 cmd.Parameters.AddWithValue("@XL", ep.QuantityXL);
                 cmd.Parameters.AddWithValue("@Notes", ep.Notes);
                 cmd.Parameters.AddWithValue("@EggTypeId", ep.EggTypeId);
+                cmd.Parameters.AddWithValue("@BarnId", ep.BarnId);
                 cmd.Parameters.AddWithValue("@Id", ep.Id);
 
                 cmd.ExecuteNonQuery();

@@ -19,21 +19,31 @@ namespace LasDeliciasERP.Pages.EggProduction
             if (!IsPostBack)
             {
                 BindGrid();
+                LoadEggTypes();
+                LoadBarns();
             }
         }
 
-        private List<Models.EggProduction> GetData()
+        private void LoadEggTypes()
         {
-            //data de prueba, este iría en lugar de dalEggProduction.GetAll();
-            return new List<Models.EggProduction>
-            {
-                new Models.EggProduction { Id=1, Date=DateTime.Today, QuantityS=5, QuantityM=10, QuantityL=8, QuantityXL=2, Notes="Normal" },
-                new Models.EggProduction { Id=2, Date=DateTime.Today.AddDays(-1), QuantityS=3, QuantityM=12, QuantityL=7, QuantityXL=4, Notes="Excelente" },
-                new Models.EggProduction { Id=3, Date=DateTime.Today.AddDays(-2), QuantityS=4, QuantityM=8, QuantityL=6, QuantityXL=3, Notes="Regular" },
-                new Models.EggProduction { Id=4, Date=DateTime.Today.AddDays(-3), QuantityS=6, QuantityM=9, QuantityL=5, QuantityXL=1, Notes="Buen día" },
-                new Models.EggProduction { Id=5, Date=DateTime.Today.AddDays(-4), QuantityS=2, QuantityM=7, QuantityL=3, QuantityXL=2, Notes="Promedio" },
-                new Models.EggProduction { Id=6, Date=DateTime.Today.AddDays(-5), QuantityS=5, QuantityM=11, QuantityL=9, QuantityXL=3, Notes="Alta producción" }
-            };
+            var eggTypes = new EggTypeDAL().GetAll();
+            ddlEggTypeFilter.DataSource = eggTypes;
+            ddlEggTypeFilter.DataTextField = "Name";
+            ddlEggTypeFilter.DataValueField = "Id";
+            ddlEggTypeFilter.DataBind();
+
+            ddlEggTypeFilter.Items.Insert(0, new ListItem("-- Todos --", ""));
+        }
+
+        private void LoadBarns()
+        {
+            var barns = new BarnDAL().GetAll(); 
+            ddlBarnFilter.DataSource = barns;
+            ddlBarnFilter.DataTextField = "Name"; 
+            ddlBarnFilter.DataValueField = "Id";  
+            ddlBarnFilter.DataBind();
+
+            ddlBarnFilter.Items.Insert(0, new ListItem("-- Todos --", ""));
         }
 
         private void BindGrid()
@@ -114,12 +124,40 @@ namespace LasDeliciasERP.Pages.EggProduction
                     filtered = filtered.Where(p => p.Date.Date == dt.Date);
             }
 
-            if (!string.IsNullOrEmpty(txtSearchType.Text))
-                filtered = filtered.Where(p => !string.IsNullOrEmpty(p.EggTypeName) && p.EggTypeName.ToLower().Contains(txtSearchType.Text.ToLower()));
+            if (!string.IsNullOrEmpty(ddlEggTypeFilter.SelectedValue))
+                filtered = filtered.Where(p => p.EggTypeId == int.Parse(ddlEggTypeFilter.SelectedValue));
 
-            if (!string.IsNullOrEmpty(txtSearchNotes.Text))
-                filtered = filtered.Where(p => !string.IsNullOrEmpty(p.Notes) && p.Notes.ToLower().Contains(txtSearchNotes.Text.ToLower()));
+            GridViewEggProduction.DataSource = filtered.ToList();
+            GridViewEggProduction.DataBind();
+        }
 
+        protected void FilterChanged(object sender, EventArgs e)
+        {
+            // Obtener los datos originales
+            var allProductions = ViewState["Productions"] as List<Models.EggProduction>;
+            var filtered = allProductions.AsEnumerable();
+
+            // Filtrar por fecha
+            if (!string.IsNullOrEmpty(txtSearchDate.Text) && DateTime.TryParse(txtSearchDate.Text, out DateTime dt))
+            {
+                filtered = filtered.Where(p => p.Date.Date == dt.Date);
+            }
+
+            // Filtrar por tipo de huevo
+            if (!string.IsNullOrEmpty(ddlEggTypeFilter.SelectedValue))
+            {
+                int eggTypeId = int.Parse(ddlEggTypeFilter.SelectedValue);
+                filtered = filtered.Where(p => p.EggTypeId == eggTypeId);
+            }
+
+            // Filtrar por galpón
+            if (!string.IsNullOrEmpty(ddlBarnFilter.SelectedValue))
+            {
+                int barnId = int.Parse(ddlBarnFilter.SelectedValue);
+                filtered = filtered.Where(p => p.BarnId == barnId);
+            }
+
+            // Asignar al GridView
             GridViewEggProduction.DataSource = filtered.ToList();
             GridViewEggProduction.DataBind();
         }
@@ -127,8 +165,8 @@ namespace LasDeliciasERP.Pages.EggProduction
         protected void btnClear_Click(object sender, EventArgs e)
         {
             txtSearchDate.Text = "";
-            txtSearchType.Text = "";
-            txtSearchNotes.Text = "";
+            ddlEggTypeFilter.SelectedIndex = 0;
+            ddlBarnFilter.SelectedIndex = 0;
 
             GridViewEggProduction.DataSource = ViewState["Productions"];
             GridViewEggProduction.DataBind();

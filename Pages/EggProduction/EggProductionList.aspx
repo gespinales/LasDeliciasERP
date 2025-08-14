@@ -19,10 +19,14 @@
         <asp:TextBox ID="txtSearchDate" runat="server" CssClass="form-control form-control-sm" placeholder="dd/mm/yyyy" TextMode="Date"></asp:TextBox>
 
         <label class="form-label mb-0">Tipo de Huevo:</label>
-        <asp:TextBox ID="txtSearchType" runat="server" CssClass="form-control form-control-sm" placeholder="Huevo Blanco / Marrón"></asp:TextBox>
+        <asp:DropDownList ID="ddlEggTypeFilter" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="FilterChanged">
+            <asp:ListItem Text="-- Tipo de Huevo --" Value="" />
+        </asp:DropDownList>
 
-        <label class="form-label mb-0">Notas:</label>
-        <asp:TextBox ID="txtSearchNotes" runat="server" CssClass="form-control form-control-sm" placeholder="Buscar notas"></asp:TextBox>
+        <label class="form-label mb-0">Galpón:</label>
+        <asp:DropDownList ID="ddlBarnFilter" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="FilterChanged">
+            <asp:ListItem Text="-- Galpón --" Value="" />
+        </asp:DropDownList>
 
         <!-- Botones elegantes -->
         <asp:LinkButton ID="btnSearch" runat="server" CssClass="btn btn-primary btn-sm d-flex align-items-center shadow-sm" OnClick="btnSearch_Click">
@@ -48,6 +52,7 @@
                 <asp:BoundField DataField="Id" HeaderText="ID" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="fw-bold bg-light text-center" />
                 <asp:BoundField DataField="Date" HeaderText="Fecha" DataFormatString="{0:dd/MM/yyyy}" SortExpression="Date" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="fw-bold bg-light text-center" />
                 <asp:BoundField DataField="EggTypeName" HeaderText="Tipo de Huevo" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="fw-bold bg-light text-center" />
+                <asp:BoundField DataField="BarnName" HeaderText="Galpón" SortExpression="BarnName" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="fw-bold bg-light text-center" />
                 <asp:BoundField DataField="QuantityS" HeaderText="Huevos S" SortExpression="QuantityS" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="fw-bold bg-light text-center" />
                 <asp:BoundField DataField="QuantityM" HeaderText="Huevos M" SortExpression="QuantityM" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="fw-bold bg-light text-center" />
                 <asp:BoundField DataField="QuantityL" HeaderText="Huevos L" SortExpression="QuantityL" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="fw-bold bg-light text-center" />

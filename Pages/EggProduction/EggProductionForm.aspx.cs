@@ -9,13 +9,15 @@ namespace LasDeliciasERP.Pages.EggProduction
         //objeto para el acceso a los datos
         EggProductionDAL dalEggProduction = new EggProductionDAL();
         EggTypeDAL dalEggType = new EggTypeDAL();
+        BarnDAL dalBarn = new BarnDAL();
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                //Cargar primero la lista de valores de los tipos de huevos
-                LoadEggTypes(); 
+                // Cargar listas de valores
+                LoadEggTypes();
+                LoadBarns();
 
                 //Se valida si viene de una creación o modificación
                 string idStr = Request.QueryString["id"];
@@ -45,6 +47,17 @@ namespace LasDeliciasERP.Pages.EggProduction
             ddlEggType.Items.Insert(0, new System.Web.UI.WebControls.ListItem("-- Seleccione --", ""));
         }
 
+        private void LoadBarns()
+        {
+            var barns = dalBarn.GetAll();
+            ddlBarn.DataSource = barns;
+            ddlBarn.DataTextField = "Name";
+            ddlBarn.DataValueField = "Id";
+            ddlBarn.DataBind();
+
+            ddlBarn.Items.Insert(0, new System.Web.UI.WebControls.ListItem("-- Seleccione --", ""));
+        }
+
         private void LoadData(int id)
         {
             var production = dalEggProduction.GetById(id);
@@ -58,6 +71,7 @@ namespace LasDeliciasERP.Pages.EggProduction
                 txtXL.Text = production.QuantityXL.ToString();
                 txtNotes.Text = production.Notes;
                 ddlEggType.SelectedValue = production.EggTypeId.ToString();
+                ddlBarn.SelectedValue = production.BarnId.ToString();
             }
             else
             {
@@ -77,7 +91,8 @@ namespace LasDeliciasERP.Pages.EggProduction
                 QuantityL = string.IsNullOrEmpty(txtL.Text) ? 0 : int.Parse(txtL.Text),
                 QuantityXL = string.IsNullOrEmpty(txtXL.Text) ? 0 : int.Parse(txtXL.Text),
                 Notes = txtNotes.Text,
-                EggTypeId = int.Parse(ddlEggType.SelectedValue)
+                EggTypeId = int.Parse(ddlEggType.SelectedValue),
+                BarnId = int.Parse(ddlBarn.SelectedValue)
             };
 
             if (!string.IsNullOrEmpty(hfId.Value))

@@ -20,6 +20,12 @@
             <asp:DropDownList ID="ddlEggType" runat="server" CssClass="form-select"></asp:DropDownList>
         </div>
 
+        <!-- Galpón / Barn -->
+        <div class="mb-3">
+            <label for="ddlBarn" class="form-label">Galpón:</label>
+            <asp:DropDownList ID="ddlBarn" runat="server" CssClass="form-select"></asp:DropDownList>
+        </div>
+
         <!-- Cantidad por tamaño -->
         <div class="mb-3">
             <label class="form-label">Cantidad de huevos por tamaño (gramos):</label>

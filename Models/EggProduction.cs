@@ -43,6 +43,10 @@ namespace LasDeliciasERP.Models
 
         // Vendrán de la tabla de tipos de huevos
         public int EggTypeId { get; set; }      
-        public string EggTypeName { get; set; } 
+        public string EggTypeName { get; set; }
+
+        // Vendrá de la tabla del galpón (barn)
+        public int BarnId { get; set; }          
+        public string BarnName { get; set; }      
     }
 }
