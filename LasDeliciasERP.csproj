@@ -169,6 +169,8 @@
     <Content Include="Content\Site.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
+    <Content Include="Pages\Customer\CustomerForm.aspx" />
+    <Content Include="Pages\Customer\CustomerList.aspx" />
     <Content Include="Pages\Dashboard\Dashboard.aspx" />
     <Content Include="Pages\EggProduction\EggProductionForm.aspx" />
     <Content Include="Pages\EggProduction\EggProductionList.aspx" />
@@ -234,6 +236,7 @@
     <Content Include="Site.Mobile.Master" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccesoADatos\CustomerDAL.cs" />
     <Compile Include="AccesoADatos\BarnDAL.cs" />
     <Compile Include="AccesoADatos\EggInventoryDAL.cs" />
     <Compile Include="AccesoADatos\EggTypeDAL.cs" />
@@ -243,11 +246,26 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Customer.cs" />
     <Compile Include="Models\Barn.cs" />
     <Compile Include="Models\EggInventory.cs" />
     <Compile Include="Models\EggType.cs" />
     <Compile Include="Models\EggSize.cs" />
     <Compile Include="Models\EggProduction.cs" />
+    <Compile Include="Pages\Customer\CustomerForm.aspx.cs">
+      <DependentUpon>CustomerForm.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Customer\CustomerForm.aspx.designer.cs">
+      <DependentUpon>CustomerForm.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Customer\CustomerList.aspx.cs">
+      <DependentUpon>CustomerList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Customer\CustomerList.aspx.designer.cs">
+      <DependentUpon>CustomerList.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Dashboard\Dashboard.aspx.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

@@ -43,6 +43,19 @@
             </a>
         </div>
 
+        <!-- Clientes -->
+        <div class="col-md-4">
+            <a href="../Customer/CustomerList.aspx" class="text-decoration-none">
+                <div class="card text-white shadow-sm h-100 hover-shadow bg-primary">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people-fill display-4"></i>
+                        <h5 class="card-title mt-3">Clientes</h5>
+                        <p class="card-text">Administrar información de clientes y contactos para ventas.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
         <!-- Agrega más módulos aquí -->
     </div>
 

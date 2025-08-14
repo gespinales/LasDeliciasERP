@@ -27,7 +27,7 @@
                 <div class="collapse navbar-collapse" id="navbarMenu">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" href="EggProductionList.aspx">
+                            <a class="nav-link" href="../EggProduction/EggProductionList.aspx">
                                 <i class="bi bi-egg-fill"></i> Producción de Huevos
                             </a>
                         </li>
@@ -39,6 +39,12 @@
                         <li class="nav-item">
                             <a class="nav-link" href="Vaccines.aspx">
                                 <i class="bi bi-heart-pulse-fill"></i> Vacunas
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="../Customer/CustomerList.aspx">
+                                <i class="bi bi-people-fill"></i> Clientes
                             </a>
                         </li>
                         <!-- Agregar más módulos según sea necesario -->

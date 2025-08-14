@@ -28,7 +28,7 @@
         <!-- Botón Agregar nueva recolección -->
         <div class="mb-3 mt-4">
             <a href="EggProductionForm.aspx" class="btn btn-success">
-                <i class="bi bi-plus-circle-fill"></i>Agregar Nueva Recolección
+                <i class="bi bi-plus-circle-fill"></i> Agregar Nueva Recolección
             </a>
         </div>
 
