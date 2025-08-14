@@ -235,6 +235,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccesoADatos\BarnDAL.cs" />
+    <Compile Include="AccesoADatos\EggInventoryDAL.cs" />
     <Compile Include="AccesoADatos\EggTypeDAL.cs" />
     <Compile Include="AccesoADatos\EggProductionDAL.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
@@ -243,6 +244,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Barn.cs" />
+    <Compile Include="Models\EggInventory.cs" />
     <Compile Include="Models\EggType.cs" />
     <Compile Include="Models\EggSize.cs" />
     <Compile Include="Models\EggProduction.cs" />

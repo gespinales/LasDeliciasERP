@@ -8,7 +8,7 @@ using System.Web.UI.WebControls;
 
 namespace LasDeliciasERP.Pages.EggProduction
 {
-    public partial class EggProductionList : System.Web.UI.Page
+    public partial class EggProductionList : Page
     {
         //objeto para el acceso a los datos
         EggProductionDAL dalEggProduction = new EggProductionDAL();
@@ -18,6 +18,7 @@ namespace LasDeliciasERP.Pages.EggProduction
         {
             if (!IsPostBack)
             {
+                BindInventory();
                 BindGrid();
                 LoadEggTypes();
                 LoadBarns();
@@ -46,6 +47,26 @@ namespace LasDeliciasERP.Pages.EggProduction
             ddlBarnFilter.Items.Insert(0, new ListItem("-- Todos --", ""));
         }
 
+        private void BindInventory()
+        {
+            var inventory = new EggInventoryDAL().GetAll();
+            var eggTypes = new EggTypeDAL().GetAll();
+            var inventoryWithNames = from inv in inventory
+                                     join et in eggTypes on inv.EggTypeId equals et.Id
+                                     select new
+                                     {
+                                         EggTypeName = et.Name,
+                                         inv.QuantityS,
+                                         inv.QuantityM,
+                                         inv.QuantityL,
+                                         inv.QuantityXL,
+                                         TotalQuantity = inv.QuantityS + inv.QuantityM + inv.QuantityL + inv.QuantityXL
+                                     };
+
+            GridViewEggInventory.DataSource = inventoryWithNames.ToList();
+            GridViewEggInventory.DataBind();
+        }
+
         private void BindGrid()
         {
             // Obtener todos los registros desde MySQL
@@ -56,7 +77,7 @@ namespace LasDeliciasERP.Pages.EggProduction
             GridViewEggProduction.DataBind();
         }
 
-        protected void GridViewEggProduction_PageIndexChanging(object sender, System.Web.UI.WebControls.GridViewPageEventArgs e)
+        protected void GridViewEggProduction_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             GridViewEggProduction.PageIndex = e.NewPageIndex;
             GridViewEggProduction.DataSource = ViewState["Productions"];
@@ -64,7 +85,7 @@ namespace LasDeliciasERP.Pages.EggProduction
         }
 
         // Colores por TotalQuantity
-        protected void GridViewEggProduction_RowDataBound(object sender, System.Web.UI.WebControls.GridViewRowEventArgs e)
+        protected void GridViewEggProduction_RowDataBound(object sender, GridViewRowEventArgs e)
         {
             if (e.Row.RowType == DataControlRowType.DataRow)
             {
