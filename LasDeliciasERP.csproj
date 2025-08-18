@@ -169,6 +169,11 @@
     <Content Include="Content\Site.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
+    <Content Include="Pages\Bird\BirdBatch.aspx" />
+    <Content Include="Pages\Bird\BirdBatchList.aspx" />
+    <Content Include="Pages\Bird\BirdDeath.aspx" />
+    <Content Include="Pages\Bird\BirdDeathList.aspx" />
+    <Content Include="Pages\Bird\BirdMovementReport.aspx" />
     <Content Include="Pages\Customer\CustomerForm.aspx" />
     <Content Include="Pages\Customer\CustomerList.aspx" />
     <Content Include="Pages\Dashboard\Dashboard.aspx" />
@@ -236,9 +241,13 @@
     <Content Include="Site.Mobile.Master" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccesoADatos\BirdDeathDAL.cs" />
+    <Compile Include="AccesoADatos\BirdMovementDAL.cs" />
     <Compile Include="AccesoADatos\CustomerDAL.cs" />
     <Compile Include="AccesoADatos\BarnDAL.cs" />
     <Compile Include="AccesoADatos\EggInventoryDAL.cs" />
+    <Compile Include="AccesoADatos\BirdBatchDAL.cs" />
+    <Compile Include="AccesoADatos\BirdTypesDAL.cs" />
     <Compile Include="AccesoADatos\EggTypeDAL.cs" />
     <Compile Include="AccesoADatos\EggProductionDAL.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
@@ -246,12 +255,51 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\BirdDeath.cs" />
+    <Compile Include="Models\BirdTypes.cs" />
+    <Compile Include="Models\BirdBatch.cs" />
     <Compile Include="Models\Customer.cs" />
     <Compile Include="Models\Barn.cs" />
     <Compile Include="Models\EggInventory.cs" />
+    <Compile Include="Models\BirdMovement.cs" />
     <Compile Include="Models\EggType.cs" />
     <Compile Include="Models\EggSize.cs" />
     <Compile Include="Models\EggProduction.cs" />
+    <Compile Include="Pages\Bird\BirdBatch.aspx.cs">
+      <DependentUpon>BirdBatch.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Bird\BirdBatch.aspx.designer.cs">
+      <DependentUpon>BirdBatch.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Bird\BirdBatchList.aspx.cs">
+      <DependentUpon>BirdBatchList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Bird\BirdBatchList.aspx.designer.cs">
+      <DependentUpon>BirdBatchList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Bird\BirdDeath.aspx.cs">
+      <DependentUpon>BirdDeath.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Bird\BirdDeath.aspx.designer.cs">
+      <DependentUpon>BirdDeath.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Bird\BirdDeathList.aspx.cs">
+      <DependentUpon>BirdDeathList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Bird\BirdDeathList.aspx.designer.cs">
+      <DependentUpon>BirdDeathList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Bird\BirdMovementReport.aspx.cs">
+      <DependentUpon>BirdMovementReport.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Bird\BirdMovementReport.aspx.designer.cs">
+      <DependentUpon>BirdMovementReport.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Customer\CustomerForm.aspx.cs">
       <DependentUpon>CustomerForm.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

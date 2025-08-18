@@ -56,6 +56,65 @@
             </a>
         </div>
 
+        <!-- Módulo Aves -->
+        <div class="col-md-12">
+            <h3 class="mb-3">Módulo Aves</h3>
+            <div class="row g-3">
+                <!-- Lotes -->
+                <div class="col-md-4">
+                    <a href="../Bird/BirdBatchList.aspx" class="text-decoration-none">
+                        <div class="card text-white shadow-sm h-100 hover-shadow bg-primary">
+                            <div class="card-body">
+                                <i class="bi bi-box-seam display-4"></i>
+                                <h5 class="card-title mt-3">Lotes</h5>
+                                <p class="card-text">Gestiona los lotes de aves por galpón.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Decesos -->
+                <div class="col-md-4">
+                    <a href="../Bird/BirdDeathList.aspx" class="text-decoration-none">
+                        <div class="card text-white shadow-sm h-100 hover-shadow bg-danger">
+                            <div class="card-body">
+                                <i class="bi bi-x-circle-fill display-4"></i>
+                                <h5 class="card-title mt-3">Decesos</h5>
+                                <p class="card-text">Registrar y controlar los decesos de aves por galpón.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Movimientos -->
+                <%--<div class="col-md-4">
+                    <a href="../Bird/BirdMovementList.aspx" class="text-decoration-none">
+                        <div class="card text-white shadow-sm h-100 hover-shadow bg-success">
+                            <div class="card-body">
+                                <i class="bi bi-arrow-left-right display-4"></i>
+                                <h5 class="card-title mt-3">Movimientos</h5>
+                                <p class="card-text">Reporte entradas y salidas de aves.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>--%>
+
+                <!-- Población -->
+                <%--<div class="col-md-4">
+                    <a href="../Bird/PopulationList.aspx" class="text-decoration-none">
+                        <div class="card text-white shadow-sm h-100 hover-shadow bg-warning">
+                            <div class="card-body">
+                                <i class="bi bi-people-fill display-4"></i>
+                                <h5 class="card-title mt-3">Población</h5>
+                                <p class="card-text">Visualiza la población actual por tipo de ave y galpón.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>--%>
+            </div>
+        </div>
+
+
         <!-- Agrega más módulos aquí -->
     </div>
 
