@@ -3,7 +3,6 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using LasDeliciasERP.AccesoADatos;
-using System.Collections.Generic;
 
 namespace LasDeliciasERP.Pages.Bird
 {
@@ -27,7 +26,7 @@ namespace LasDeliciasERP.Pages.Bird
         {
             // Lotes
             ddlBatch.DataSource = dalBatch.GetAll();
-            ddlBatch.DataTextField = "BatchDate"; // Puedes personalizar: Fecha o Fecha + ID
+            ddlBatch.DataTextField = "BatchDate";
             ddlBatch.DataValueField = "Id";
             ddlBatch.DataBind();
             ddlBatch.Items.Insert(0, new ListItem("-- Todos los Lotes --", ""));
@@ -41,10 +40,13 @@ namespace LasDeliciasERP.Pages.Bird
 
             // Tipos de Aves
             ddlBirdType.DataSource = dalBirdType.GetAll();
-            ddlBirdType.DataTextField = "Breed"; // Mostrar raza
+            ddlBirdType.DataTextField = "Breed";
             ddlBirdType.DataValueField = "Id";
             ddlBirdType.DataBind();
             ddlBirdType.Items.Insert(0, new ListItem("-- Todos los Tipos de Aves --", ""));
+
+            // Tipo de gráfico
+            ddlChartType.SelectedIndex = 0; // Por defecto barras
         }
 
         protected void btnFilter_Click(object sender, EventArgs e)
@@ -55,7 +57,7 @@ namespace LasDeliciasERP.Pages.Bird
         private void LoadReport()
         {
             // Obtener todos los movimientos
-            var movements = dalMovement.GetAll(); // Devuelve lista completa de movimientos
+            var movements = dalMovement.GetAll();
 
             // Aplicar filtros
             if (!string.IsNullOrEmpty(ddlBatch.SelectedValue))
@@ -67,19 +69,13 @@ namespace LasDeliciasERP.Pages.Bird
             if (!string.IsNullOrEmpty(ddlBirdType.SelectedValue))
                 movements = movements.Where(m => m.BirdTypeId == int.Parse(ddlBirdType.SelectedValue)).ToList();
 
-            if (!string.IsNullOrEmpty(txtStartDate.Text))
-            {
-                if (DateTime.TryParse(txtStartDate.Text, out DateTime startDate))
-                    movements = movements.Where(m => m.MovementDate >= startDate).ToList();
-            }
+            if (!string.IsNullOrEmpty(txtStartDate.Text) && DateTime.TryParse(txtStartDate.Text, out DateTime startDate))
+                movements = movements.Where(m => m.MovementDate >= startDate).ToList();
 
-            if (!string.IsNullOrEmpty(txtEndDate.Text))
-            {
-                if (DateTime.TryParse(txtEndDate.Text, out DateTime endDate))
-                    movements = movements.Where(m => m.MovementDate <= endDate).ToList();
-            }
+            if (!string.IsNullOrEmpty(txtEndDate.Text) && DateTime.TryParse(txtEndDate.Text, out DateTime endDate))
+                movements = movements.Where(m => m.MovementDate <= endDate).ToList();
 
-            // Bind a GridView
+            // GridView
             gvMovements.DataSource = movements.Select(m => new
             {
                 m.Id,
@@ -92,18 +88,22 @@ namespace LasDeliciasERP.Pages.Bird
             }).ToList();
             gvMovements.DataBind();
 
-            // Preparar datos para Chart.js
+            // Datos para la gráfica
             int entradas = movements.Where(m => m.MovementType == "Entrada").Sum(m => m.Quantity);
             int salidas = movements.Where(m => m.MovementType == "Salida").Sum(m => m.Quantity);
 
-            string chartData = $@"
+            // Tipo de gráfico seleccionado
+            string chartType = ddlChartType.SelectedValue;
+
+            // Script dinámico
+            string chartScript = $@"
                 <script>
                     var ctx = document.getElementById('movementChart').getContext('2d');
                     if (window.movementChart instanceof Chart) {{
                         window.movementChart.destroy();
                     }}
                     window.movementChart = new Chart(ctx, {{
-                        type: 'bar',
+                        type: '{chartType}',
                         data: {{
                             labels: ['Entradas', 'Salidas'],
                             datasets: [{{
@@ -114,14 +114,16 @@ namespace LasDeliciasERP.Pages.Bird
                         }},
                         options: {{
                             responsive: true,
+                            maintainAspectRatio: false,
                             plugins: {{
-                                legend: {{ display: false }}
+                                legend: {{ position: 'top' }},
+                                title: {{ display: true, text: 'Movimientos de Aves' }}
                             }}
                         }}
                     }});
                 </script>";
 
-            ltChartData.Text = chartData;
+            ltChartData.Text = chartScript;
         }
 
         protected void gvMovements_PageIndexChanging(object sender, GridViewPageEventArgs e)

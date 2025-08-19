@@ -21,6 +21,16 @@
                 <label for="ddlBirdType" class="form-label">Tipo de Ave (Raza)</label>
                 <asp:DropDownList ID="ddlBirdType" runat="server" CssClass="form-select"></asp:DropDownList>
             </div>
+
+            <div class="col-md-3">
+                <label for="ddlChartType" class="form-label">Tipo de Gráfica</label>
+                <asp:DropDownList ID="ddlChartType" runat="server" CssClass="form-select">
+                    <asp:ListItem Text="Barras" Value="bar" />
+                    <asp:ListItem Text="Líneas" Value="line" />
+                    <asp:ListItem Text="Pastel" Value="pie" />
+                    <asp:ListItem Text="Dona" Value="doughnut" />
+                </asp:DropDownList>
+            </div>
         </div>
 
         <div class="row g-3 mb-4">
@@ -42,7 +52,9 @@
         <!-- GRÁFICO -->
         <div class="card shadow-sm mb-4">
             <div class="card-body">
-                <canvas id="movementChart" height="100"></canvas>
+                <div class="chart-container" style="position: relative; height:400px; width:100%;">
+                    <canvas id="movementChart"></canvas>
+                </div>
                 <asp:Literal ID="ltChartData" runat="server"></asp:Literal>
             </div>
         </div>
