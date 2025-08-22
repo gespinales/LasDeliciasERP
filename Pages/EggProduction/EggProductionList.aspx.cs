@@ -142,11 +142,11 @@ namespace LasDeliciasERP.Pages.EggProduction
             if (!string.IsNullOrEmpty(txtSearchDate.Text))
             {
                 if (DateTime.TryParse(txtSearchDate.Text, out DateTime dt))
-                    filtered = filtered.Where(p => p.Date.Date == dt.Date);
+                    filtered = filtered.Where(p => p.ProductionDate.Date == dt.Date);
             }
 
-            if (!string.IsNullOrEmpty(ddlEggTypeFilter.SelectedValue))
-                filtered = filtered.Where(p => p.EggTypeId == int.Parse(ddlEggTypeFilter.SelectedValue));
+            //if (!string.IsNullOrEmpty(ddlEggTypeFilter.SelectedValue))
+            //    filtered = filtered.Where(p => p.EggTypeId == int.Parse(ddlEggTypeFilter.SelectedValue));
 
             GridViewEggProduction.DataSource = filtered.ToList();
             GridViewEggProduction.DataBind();
@@ -161,15 +161,15 @@ namespace LasDeliciasERP.Pages.EggProduction
             // Filtrar por fecha
             if (!string.IsNullOrEmpty(txtSearchDate.Text) && DateTime.TryParse(txtSearchDate.Text, out DateTime dt))
             {
-                filtered = filtered.Where(p => p.Date.Date == dt.Date);
+                filtered = filtered.Where(p => p.ProductionDate.Date == dt.Date);
             }
 
             // Filtrar por tipo de huevo
-            if (!string.IsNullOrEmpty(ddlEggTypeFilter.SelectedValue))
-            {
-                int eggTypeId = int.Parse(ddlEggTypeFilter.SelectedValue);
-                filtered = filtered.Where(p => p.EggTypeId == eggTypeId);
-            }
+            //if (!string.IsNullOrEmpty(ddlEggTypeFilter.SelectedValue))
+            //{
+            //    int eggTypeId = int.Parse(ddlEggTypeFilter.SelectedValue);
+            //    filtered = filtered.Where(p => p.EggTypeId == eggTypeId);
+            //}
 
             // Filtrar por galpón
             if (!string.IsNullOrEmpty(ddlBarnFilter.SelectedValue))

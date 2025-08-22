@@ -70,7 +70,7 @@
 
                     <Columns>
                         <asp:BoundField DataField="Id" HeaderText="ID" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="fw-bold bg-light text-center" />
-                        <asp:BoundField DataField="Date" HeaderText="Fecha" DataFormatString="{0:dd/MM/yyyy}" SortExpression="Date" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="fw-bold bg-light text-center" />
+                        <asp:BoundField DataField="ProductionDate" HeaderText="Fecha" DataFormatString="{0:dd/MM/yyyy}" SortExpression="ProductionDate" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="fw-bold bg-light text-center" />
                         <asp:BoundField DataField="EggTypeName" HeaderText="Tipo de Huevo" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="fw-bold bg-light text-center" />
                         <asp:BoundField DataField="BarnName" HeaderText="Galpón" SortExpression="BarnName" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="fw-bold bg-light text-center" />
                         <asp:BoundField DataField="QuantityS" HeaderText="Huevos S" SortExpression="QuantityS" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="fw-bold bg-light text-center" />

@@ -1,52 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace LasDeliciasERP.Models
 {
     [Serializable]
     public class EggProduction
     {
+        // Campos de la tabla
         public int Id { get; set; }
-        public DateTime Date { get; set; }
-        
-        // Cantidad de huevos por categoría de tamaño
+        public DateTime ProductionDate { get; set; }
+        public int BarnId { get; set; }  // llave foránea del galón
+        public string Notes { get; set; }
+
+        // Campos adicionales para pintar en pantallas
+        public string EggTypeName { get; set; }
+        public string BarnName { get; set; }
+
+        // Totales por tamaño, no pertenecen a la tabla, son solo de transformación
         public int QuantityS { get; set; }
         public int QuantityM { get; set; }
         public int QuantityL { get; set; }
         public int QuantityXL { get; set; }
 
-        // Peso promedio aproximado por categoría (puedes ajustar según estándares locales)
-        private readonly Dictionary<EggSize, double> AverageWeightPerSize = new Dictionary<EggSize, double>
-        {
-            { EggSize.S, 50 },   // gramos
-            { EggSize.M, 58 },
-            { EggSize.L, 68 },
-            { EggSize.XL, 75 }
-        };
+        public int TotalQuantity { get; set; }
+        public double TotalWeight { get; set; }
+        public double AverageWeight { get; set; }
 
-        // Total de huevos
-        public int TotalQuantity => QuantityS + QuantityM + QuantityL + QuantityXL;
-
-        // Total de peso aproximado
-        public double TotalWeight => QuantityS * AverageWeightPerSize[EggSize.S]
-                                  + QuantityM * AverageWeightPerSize[EggSize.M]
-                                  + QuantityL * AverageWeightPerSize[EggSize.L]
-                                  + QuantityXL * AverageWeightPerSize[EggSize.XL];
-
-        // Peso promedio aproximado por huevo
-        public double AverageWeight => TotalQuantity > 0 ? TotalWeight / TotalQuantity : 0;
-
-        public string Notes { get; set; }
-
-
-        // Vendrán de la tabla de tipos de huevos
-        public int EggTypeId { get; set; }      
-        public string EggTypeName { get; set; }
-
-        // Vendrá de la tabla del galpón (barn)
-        public int BarnId { get; set; }          
-        public string BarnName { get; set; }      
+        // Lista de detalles de esta producción
+        public List<EggProductionDetail> Details { get; set; } = new List<EggProductionDetail>();
     }
 }

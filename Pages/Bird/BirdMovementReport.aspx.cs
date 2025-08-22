@@ -95,36 +95,43 @@ namespace LasDeliciasERP.Pages.Bird
             // Tipo de gráfico seleccionado
             string chartType = ddlChartType.SelectedValue;
 
-            // Script dinámico
+            // Script dinámico seguro
             string chartScript = $@"
-                <script>
-                    var ctx = document.getElementById('movementChart').getContext('2d');
-                    if (window.movementChart instanceof Chart) {{
-                        window.movementChart.destroy();
-                    }}
-                    window.movementChart = new Chart(ctx, {{
-                        type: '{chartType}',
-                        data: {{
-                            labels: ['Entradas', 'Salidas'],
-                            datasets: [{{
-                                label: 'Cantidad',
-                                data: [{entradas}, {salidas}],
-                                backgroundColor: ['#198754', '#dc3545']
-                            }}]
-                        }},
-                        options: {{
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {{
-                                legend: {{ position: 'top' }},
-                                title: {{ display: true, text: 'Movimientos de Aves' }}
-                            }}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {{
+                var canvas = document.getElementById('movementChart');
+                if (!canvas) return; // previene errores si no existe el canvas
+                var ctx = canvas.getContext('2d');
+                
+                if (window.movementChart instanceof Chart) {{
+                    window.movementChart.destroy();
+                }}
+                
+                window.movementChart = new Chart(ctx, {{
+                    type: '{chartType}',
+                    data: {{
+                        labels: ['Entradas', 'Salidas'],
+                        datasets: [{{
+                            label: 'Cantidad',
+                            data: [{entradas}, {salidas}],
+                            backgroundColor: ['#198754', '#dc3545']
+                        }}]
+                    }},
+                    options: {{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {{
+                            legend: {{ position: 'top' }},
+                            title: {{ display: true, text: 'Movimientos de Aves' }}
                         }}
-                    }});
-                </script>";
+                    }}
+                }});
+            }});
+        </script>";
 
             ltChartData.Text = chartScript;
         }
+
 
         protected void gvMovements_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {

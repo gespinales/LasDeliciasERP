@@ -179,6 +179,7 @@
     <Content Include="Pages\Dashboard\Dashboard.aspx" />
     <Content Include="Pages\EggProduction\EggProductionForm.aspx" />
     <Content Include="Pages\EggProduction\EggProductionList.aspx" />
+    <Content Include="Pages\Sales\Sales.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -241,6 +242,9 @@
     <Content Include="Site.Mobile.Master" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccesoADatos\UnitTypeDAL.cs" />
+    <Compile Include="AccesoADatos\ProductDAL.cs" />
+    <Compile Include="AccesoADatos\SalesDAL.cs" />
     <Compile Include="AccesoADatos\BirdDeathDAL.cs" />
     <Compile Include="AccesoADatos\BirdMovementDAL.cs" />
     <Compile Include="AccesoADatos\CustomerDAL.cs" />
@@ -255,6 +259,12 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\EggProductionDetail.cs" />
+    <Compile Include="Models\Sale.cs" />
+    <Compile Include="Models\SaleDetail.cs" />
+    <Compile Include="Models\ProductPrice.cs" />
+    <Compile Include="Models\Product.cs" />
+    <Compile Include="Models\UnitType.cs" />
     <Compile Include="Models\BirdDeath.cs" />
     <Compile Include="Models\BirdTypes.cs" />
     <Compile Include="Models\BirdBatch.cs" />
@@ -334,6 +344,12 @@
     </Compile>
     <Compile Include="Pages\EggProduction\EggProductionList.aspx.designer.cs">
       <DependentUpon>EggProductionList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Sales\Sales.aspx.cs">
+      <DependentUpon>Sales.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Sales\Sales.aspx.designer.cs">
+      <DependentUpon>Sales.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Site.Master.cs">
