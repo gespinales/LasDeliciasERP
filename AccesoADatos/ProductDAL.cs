@@ -42,19 +42,24 @@ namespace LasDeliciasERP.AccesoADatos
             using (var conn = new MySqlConnection(connString))
             {
                 conn.Open();
+
                 string sql = @"
             SELECT 
                 p.Id, 
                 p.Name, 
                 p.Notes, 
+                p.UnitTypeId,
                 ut.Name AS UnitName,
+                p.EggSizeId,
+                es.Name AS EggSizeName,
                 pp.Price
             FROM Products p
             LEFT JOIN UnitTypes ut ON p.UnitTypeId = ut.Id
+            LEFT JOIN EggSize es ON p.EggSizeId = es.Id
             LEFT JOIN ProductPrices pp 
                 ON pp.ProductId = p.Id 
                 AND (pp.EndDate IS NULL OR pp.EndDate > NOW())
-            ORDER BY p.Name";
+            ORDER BY p.Name, ut.Name, es.Name";
 
                 using (var cmd = new MySqlCommand(sql, conn))
                 using (var reader = cmd.ExecuteReader())
@@ -65,8 +70,11 @@ namespace LasDeliciasERP.AccesoADatos
                         {
                             Id = Convert.ToInt32(reader["Id"]),
                             Name = reader["Name"].ToString(),
-                            UnitName = reader["UnitName"]?.ToString(),
                             Notes = reader["Notes"]?.ToString(),
+                            UnitTypeId = reader["UnitTypeId"] != DBNull.Value ? Convert.ToInt32(reader["UnitTypeId"]) : 0,
+                            UnitName = reader["UnitName"]?.ToString(),
+                            EggSizeId = reader["EggSizeId"] != DBNull.Value ? Convert.ToInt32(reader["EggSizeId"]) : 0,
+                            EggSizeName = reader["EggSizeName"]?.ToString(),
                             Price = reader["Price"] != DBNull.Value ? Convert.ToDecimal(reader["Price"]) : 0m
                         });
                     }

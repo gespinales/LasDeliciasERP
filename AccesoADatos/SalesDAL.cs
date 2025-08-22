@@ -10,7 +10,7 @@ namespace LasDeliciasERP.AccesoADatos
     {
         private string connString = ConfigurationManager.ConnectionStrings["EJDMDConn"].ConnectionString;
 
-        public List<Sale> GetAll(DateTime? startDate = null, DateTime? endDate = null)
+        public List<Sale> GetAllByDate(DateTime? startDate = null, DateTime? endDate = null)
         {
             var list = new List<Sale>();
             using (var conn = new MySqlConnection(connString))
@@ -70,164 +70,78 @@ namespace LasDeliciasERP.AccesoADatos
             return null;
         }
 
-        public List<SaleDetail> GetDetailsBySaleId(int saleId)
+        public List<Sale> GetAllSales()
         {
-            var list = new List<SaleDetail>();
+            var list = new List<Sale>();
+
             using (var conn = new MySqlConnection(connString))
             {
                 conn.Open();
-                string sql = @"
-            SELECT sd.Id, sd.SaleId, sd.ProductId, sd.Quantity, sd.Price
-            FROM SaleDetails sd
-            WHERE sd.SaleId=@SaleId";
 
-                using (var cmd = new MySqlCommand(sql, conn))
+                string query = @"SELECT s.Id, s.SaleDate, s.Notes,
+                                    c.Name AS CustomerName,
+                                    d.Id AS DetailId, d.ProductId, d.Quantity, d.Price,
+                                    et.Name AS EggTypeName,
+                                    es.Name AS EggSizeName,
+                                    CONCAT(et.Name, ' - ', es.Name) AS DisplayName
+                             FROM Sales s
+                             JOIN Customer c ON s.CustomerId = c.Id
+                             LEFT JOIN SaleDetails d ON s.Id = d.SaleId
+                             LEFT JOIN Products p ON d.ProductId = p.Id
+                             LEFT JOIN EggType et ON p.EggTypeId = et.Id
+                             LEFT JOIN EggSize es ON p.EggSizeId = es.Id
+                             ORDER BY s.SaleDate DESC, s.Id;";
+
+                using (var cmd = new MySqlCommand(query, conn))
+                using (var reader = cmd.ExecuteReader())
                 {
-                    cmd.Parameters.AddWithValue("@SaleId", saleId);
-                    using (var reader = cmd.ExecuteReader())
+                    int currentId = -1;
+                    Sale current = null;
+
+                    while (reader.Read())
                     {
-                        while (reader.Read())
+                        int saleId = reader.GetInt32("Id");
+
+                        if (current == null || saleId != currentId)
                         {
-                            list.Add(new SaleDetail
+                            current = new Sale
                             {
-                                Id = Convert.ToInt32(reader["Id"]),
-                                SaleId = Convert.ToInt32(reader["SaleId"]),
-                                ProductId = Convert.ToInt32(reader["ProductId"]),
-                                Quantity = Convert.ToDecimal(reader["Quantity"]),
-                                Price = Convert.ToDecimal(reader["Price"])
-                            });
+                                Id = saleId,
+                                SaleDate = reader.GetDateTime("SaleDate"),
+                                CustomerName = reader.GetString("CustomerName"),
+                                Notes = reader.IsDBNull(reader.GetOrdinal("Notes")) ? "" : reader.GetString("Notes"),
+                                Details = new List<SaleDetail>(),
+                                TotalQuantity = 0,
+                                TotalAmount = 0
+                            };
+                            list.Add(current);
+                            currentId = saleId;
+                        }
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("DetailId")))
+                        {
+                            var detail = new SaleDetail
+                            {
+                                Id = reader.GetInt32("DetailId"),
+                                SaleId = saleId,
+                                ProductId = reader.GetInt32("ProductId"),
+                                DisplayName = reader.GetString("DisplayName"),
+                                Quantity = reader.GetInt32("Quantity"),
+                                Price = reader.GetDecimal("Price")
+                            };
+
+                            current.Details.Add(detail);
+                            current.TotalQuantity += detail.Quantity;
+                            current.TotalAmount += detail.Quantity * detail.Price;
                         }
                     }
                 }
             }
+
             return list;
         }
 
-        //public void Insert(Sale sale, List<SaleDetail> details)
-        //{
-        //    using (var conn = new MySqlConnection(connString))
-        //    {
-        //        conn.Open();
-        //        using (var tran = conn.BeginTransaction())
-        //        {
-        //            try
-        //            {
-        //                // 1️ Insertar venta
-        //                string insertSale = @"INSERT INTO Sales (SaleDate, CustomerId, Notes) 
-        //                              VALUES (@SaleDate, @CustomerId, @Notes); 
-        //                              SELECT LAST_INSERT_ID();";
-        //                var cmdSale = new MySqlCommand(insertSale, conn, tran);
-        //                cmdSale.Parameters.AddWithValue("@SaleDate", sale.SaleDate);
-        //                cmdSale.Parameters.AddWithValue("@CustomerId", sale.CustomerId);
-        //                cmdSale.Parameters.AddWithValue("@Notes", (object)sale.Notes ?? DBNull.Value);
-        //                int saleId = Convert.ToInt32(cmdSale.ExecuteScalar());
-
-        //                // 2️ Insertar detalles y ajustar inventario si aplica
-        //                foreach (var d in details)
-        //                {
-        //                    // Obtener precio vigente al momento de la venta
-        //                    decimal price = GetPriceAtDate(d.ProductId, sale.SaleDate, conn, tran);
-
-        //                    // Insertar detalle de venta
-        //                    string insertDetail = @"INSERT INTO SaleDetails (SaleId, ProductId, Quantity, Price) 
-        //                                    VALUES (@SaleId, @ProductId, @Quantity, @Price)";
-        //                    var cmdDetail = new MySqlCommand(insertDetail, conn, tran);
-        //                    cmdDetail.Parameters.AddWithValue("@SaleId", saleId);
-        //                    cmdDetail.Parameters.AddWithValue("@ProductId", d.ProductId);
-        //                    cmdDetail.Parameters.AddWithValue("@Quantity", d.Quantity);
-        //                    cmdDetail.Parameters.AddWithValue("@Price", price);
-        //                    cmdDetail.ExecuteNonQuery();
-
-        //                    // Ajustar inventario si es producto tipo huevo
-        //                    if (IsEggProduct(d.ProductId, conn, tran))
-        //                    {
-        //                        // Obtener EggTypeId del producto
-        //                        int eggTypeId = GetEggTypeIdForProduct(d.ProductId, conn, tran);
-
-        //                        // Obtener columna correspondiente al tamaño del huevo
-        //                        string sizeColumn = GetEggSizeColumn(d.Size); // "S", "M", "L" o "XL"
-
-        //                        string updateInventory = $@"
-        //                    UPDATE EggInventory
-        //                    SET {sizeColumn} = {sizeColumn} - @Quantity, LastUpdated = @LastUpdated
-        //                    WHERE EggTypeId = @EggTypeId";
-
-        //                        var cmdInv = new MySqlCommand(updateInventory, conn, tran);
-        //                        cmdInv.Parameters.AddWithValue("@Quantity", d.Quantity);
-        //                        cmdInv.Parameters.AddWithValue("@LastUpdated", DateTime.Now);
-        //                        cmdInv.Parameters.AddWithValue("@EggTypeId", eggTypeId);
-        //                        cmdInv.ExecuteNonQuery();
-        //                    }
-        //                }
-
-        //                // 3️ Confirmar transacción
-        //                tran.Commit();
-        //            }
-        //            catch
-        //            {
-        //                tran.Rollback();
-        //                throw;
-        //            }
-        //        }
-        //    }
-        //}
-
-        //private int GetEggTypeIdForProduct(int productId, MySqlConnection conn, MySqlTransaction tran)
-        //{
-        //    string query = @"SELECT EggTypeId 
-        //             FROM Products 
-        //             WHERE Id = @ProductId 
-        //               AND IsEgg = 1 
-        //             LIMIT 1";
-
-        //    using (var cmd = new MySqlCommand(query, conn, tran))
-        //    {
-        //        cmd.Parameters.AddWithValue("@ProductId", productId);
-        //        object result = cmd.ExecuteScalar();
-        //        if (result != null && int.TryParse(result.ToString(), out int eggTypeId))
-        //            return eggTypeId;
-        //        else
-        //            throw new Exception($"No se encontró EggTypeId para el ProductId {productId} o el producto no es huevo.");
-        //    }
-        //}
-
-
-
-        //// Función auxiliar para mapear tamaño de huevo a columna
-        //private string GetEggSizeColumn(string size)
-        //{
-        //    return size switch
-        //    {
-        //        "S" => "QuantityS",
-        //        "M" => "QuantityM",
-        //        "L" => "QuantityL",
-        //        "XL" => "QuantityXL",
-        //        _ => throw new ArgumentException("Tamaño de huevo inválido")
-        //    };
-        //}
-
-        private decimal GetPriceAtDate(int productId, DateTime saleDate, MySqlConnection conn, MySqlTransaction tran)
-        {
-            string sql = @"SELECT Price FROM ProductPrices 
-                           WHERE ProductId=@ProductId AND StartDate <= @SaleDate 
-                             AND (EndDate IS NULL OR EndDate >= @SaleDate)
-                           ORDER BY StartDate DESC LIMIT 1";
-            var cmd = new MySqlCommand(sql, conn, tran);
-            cmd.Parameters.AddWithValue("@ProductId", productId);
-            cmd.Parameters.AddWithValue("@SaleDate", saleDate);
-            object result = cmd.ExecuteScalar();
-            return result != null ? Convert.ToDecimal(result) : 0m;
-        }
-
-        private bool IsEggProduct(int productId, MySqlConnection conn, MySqlTransaction tran)
-        {
-            string sql = "SELECT COUNT(*) FROM Products WHERE Id=@Id AND EggTypeId IS NOT NULL";
-            var cmd = new MySqlCommand(sql, conn, tran);
-            cmd.Parameters.AddWithValue("@Id", productId);
-            return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
-        }
-
-        public void Update(Sale sale, List<SaleDetail> details)
+        public int InsertSale(Sale sale)
         {
             using (var conn = new MySqlConnection(connString))
             {
@@ -236,67 +150,134 @@ namespace LasDeliciasERP.AccesoADatos
                 {
                     try
                     {
-                        // 1. Obtener detalles antiguos para ajustar inventario
-                        var oldDetails = GetDetailsBySaleId(sale.Id);
-
-                        foreach (var old in oldDetails)
+                        // Insert Sale
+                        string insertSale = @"INSERT INTO Sales (SaleDate, CustomerId, Notes)
+                                          VALUES (@SaleDate, @CustomerId, @Notes);
+                                          SELECT LAST_INSERT_ID();";
+                        int saleId;
+                        using (var cmd = new MySqlCommand(insertSale, conn, tran))
                         {
-                            var product = new ProductDAL().GetById(old.ProductId);
-                            if (product.EggTypeId.HasValue)
+                            cmd.Parameters.AddWithValue("@SaleDate", sale.SaleDate);
+                            cmd.Parameters.AddWithValue("@CustomerId", sale.CustomerId);
+                            cmd.Parameters.AddWithValue("@Notes", sale.Notes ?? "");
+                            saleId = Convert.ToInt32(cmd.ExecuteScalar());
+                        }
+
+                        // Insert SaleDetails + Update Inventory
+                        foreach (var detail in sale.Details)
+                        {
+                            string insertDetail = @"INSERT INTO SaleDetails (SaleId, ProductId, Quantity, Price)
+                                                VALUES (@SaleId, @ProductId, @Quantity, @Price);";
+                            using (var cmd = new MySqlCommand(insertDetail, conn, tran))
                             {
-                                string updateStock = @"
-                            UPDATE EggInventory
-                            SET Quantity = Quantity + @Quantity
-                            WHERE ProductId=@ProductId";
-                                var cmdStock = new MySqlCommand(updateStock, conn, tran);
-                                cmdStock.Parameters.AddWithValue("@Quantity", old.Quantity);
-                                cmdStock.Parameters.AddWithValue("@ProductId", old.ProductId);
-                                cmdStock.ExecuteNonQuery();
+                                cmd.Parameters.AddWithValue("@SaleId", saleId);
+                                cmd.Parameters.AddWithValue("@ProductId", detail.ProductId);
+                                cmd.Parameters.AddWithValue("@Quantity", detail.Quantity);
+                                cmd.Parameters.AddWithValue("@Price", detail.Price);
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            // 🔽 Restar inventario
+                            string updateInv = @"UPDATE EggInventory
+                                             SET Quantity = Quantity - @Qty, LastUpdated = NOW()
+                                             WHERE ProductId = @ProductId;";
+                            using (var cmd = new MySqlCommand(updateInv, conn, tran))
+                            {
+                                cmd.Parameters.AddWithValue("@Qty", detail.Quantity);
+                                cmd.Parameters.AddWithValue("@ProductId", detail.ProductId);
+                                cmd.ExecuteNonQuery();
                             }
                         }
 
-                        // 2. Actualizar venta
-                        string updateSale = @"
-                    UPDATE Sales
-                    SET CustomerId=@CustomerId, SaleDate=@SaleDate, Notes=@Notes
-                    WHERE Id=@Id";
-                        var cmdSale = new MySqlCommand(updateSale, conn, tran);
-                        cmdSale.Parameters.AddWithValue("@CustomerId", sale.CustomerId);
-                        cmdSale.Parameters.AddWithValue("@SaleDate", sale.SaleDate);
-                        cmdSale.Parameters.AddWithValue("@Notes", (object)(sale.Notes?.Substring(0, Math.Min(sale.Notes.Length, 250))) ?? DBNull.Value);
-                        cmdSale.Parameters.AddWithValue("@Id", sale.Id);
-                        cmdSale.ExecuteNonQuery();
+                        tran.Commit();
+                        return saleId;
+                    }
+                    catch
+                    {
+                        tran.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
 
-                        // 3. Eliminar detalles antiguos
-                        string deleteDetails = "DELETE FROM SaleDetails WHERE SaleId=@SaleId";
-                        var cmdDelete = new MySqlCommand(deleteDetails, conn, tran);
-                        cmdDelete.Parameters.AddWithValue("@SaleId", sale.Id);
-                        cmdDelete.ExecuteNonQuery();
-
-                        // 4. Insertar nuevos detalles y ajustar inventario de huevos
-                        foreach (var detail in details)
+        public void UpdateSale(Sale sale)
+        {
+            using (var conn = new MySqlConnection(connString))
+            {
+                conn.Open();
+                using (var tran = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        // Update Sale
+                        string updateSale = @"UPDATE Sales SET SaleDate=@SaleDate, CustomerId=@CustomerId, Notes=@Notes
+                                          WHERE Id=@Id;";
+                        using (var cmd = new MySqlCommand(updateSale, conn, tran))
                         {
-                            string insertDetail = @"
-                        INSERT INTO SaleDetails (SaleId, ProductId, Quantity, Price)
-                        VALUES (@SaleId, @ProductId, @Quantity, @Price)";
-                            var cmdDetail = new MySqlCommand(insertDetail, conn, tran);
-                            cmdDetail.Parameters.AddWithValue("@SaleId", sale.Id);
-                            cmdDetail.Parameters.AddWithValue("@ProductId", detail.ProductId);
-                            cmdDetail.Parameters.AddWithValue("@Quantity", detail.Quantity);
-                            cmdDetail.Parameters.AddWithValue("@Price", detail.Price);
-                            cmdDetail.ExecuteNonQuery();
+                            cmd.Parameters.AddWithValue("@SaleDate", sale.SaleDate);
+                            cmd.Parameters.AddWithValue("@CustomerId", sale.CustomerId);
+                            cmd.Parameters.AddWithValue("@Notes", sale.Notes ?? "");
+                            cmd.Parameters.AddWithValue("@Id", sale.Id);
+                            cmd.ExecuteNonQuery();
+                        }
 
-                            var product = new ProductDAL().GetById(detail.ProductId);
-                            if (product.EggTypeId.HasValue)
+                        // 1. Revertir inventario con los detalles actuales
+                        string getOldDetails = @"SELECT ProductId, Quantity FROM SaleDetails WHERE SaleId=@SaleId;";
+                        using (var cmd = new MySqlCommand(getOldDetails, conn, tran))
+                        {
+                            cmd.Parameters.AddWithValue("@SaleId", sale.Id);
+                            using (var reader = cmd.ExecuteReader())
                             {
-                                string updateStock = @"
-                            UPDATE EggInventory
-                            SET Quantity = Quantity - @Quantity
-                            WHERE ProductId=@ProductId";
-                                var cmdStock = new MySqlCommand(updateStock, conn, tran);
-                                cmdStock.Parameters.AddWithValue("@Quantity", detail.Quantity);
-                                cmdStock.Parameters.AddWithValue("@ProductId", detail.ProductId);
-                                cmdStock.ExecuteNonQuery();
+                                while (reader.Read())
+                                {
+                                    int productId = reader.GetInt32("ProductId");
+                                    int qty = reader.GetInt32("Quantity");
+
+                                    // Devolver al inventario
+                                    string revertInv = @"UPDATE EggInventory
+                                                     SET Quantity = Quantity + @Qty, LastUpdated = NOW()
+                                                     WHERE ProductId=@ProductId;";
+                                    using (var cmd2 = new MySqlCommand(revertInv, conn, tran))
+                                    {
+                                        cmd2.Parameters.AddWithValue("@Qty", qty);
+                                        cmd2.Parameters.AddWithValue("@ProductId", productId);
+                                        cmd2.ExecuteNonQuery();
+                                    }
+                                }
+                            }
+                        }
+
+                        // 2. Eliminar detalles anteriores
+                        string deleteDetails = @"DELETE FROM SaleDetails WHERE SaleId=@SaleId;";
+                        using (var cmd = new MySqlCommand(deleteDetails, conn, tran))
+                        {
+                            cmd.Parameters.AddWithValue("@SaleId", sale.Id);
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        // 3. Insertar los nuevos detalles y actualizar inventario
+                        foreach (var detail in sale.Details)
+                        {
+                            string insertDetail = @"INSERT INTO SaleDetails (SaleId, ProductId, Quantity, Price)
+                                                VALUES (@SaleId, @ProductId, @Quantity, @Price);";
+                            using (var cmd = new MySqlCommand(insertDetail, conn, tran))
+                            {
+                                cmd.Parameters.AddWithValue("@SaleId", sale.Id);
+                                cmd.Parameters.AddWithValue("@ProductId", detail.ProductId);
+                                cmd.Parameters.AddWithValue("@Quantity", detail.Quantity);
+                                cmd.Parameters.AddWithValue("@Price", detail.Price);
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            string updateInv = @"UPDATE EggInventory
+                                             SET Quantity = Quantity - @Qty, LastUpdated = NOW()
+                                             WHERE ProductId = @ProductId;";
+                            using (var cmd = new MySqlCommand(updateInv, conn, tran))
+                            {
+                                cmd.Parameters.AddWithValue("@Qty", detail.Quantity);
+                                cmd.Parameters.AddWithValue("@ProductId", detail.ProductId);
+                                cmd.ExecuteNonQuery();
                             }
                         }
 
@@ -311,8 +292,7 @@ namespace LasDeliciasERP.AccesoADatos
             }
         }
 
-
-        public void Delete(int saleId)
+        public void DeleteSale(int saleId)
         {
             using (var conn = new MySqlConnection(connString))
             {
@@ -321,47 +301,46 @@ namespace LasDeliciasERP.AccesoADatos
                 {
                     try
                     {
-                        // Ajustar inventario de huevos antes de eliminar detalles
-                        string sqlDetails = "SELECT ProductId, Quantity FROM SaleDetails WHERE SaleId=@SaleId";
-                        var cmdDetails = new MySqlCommand(sqlDetails, conn, tran);
-                        cmdDetails.Parameters.AddWithValue("@SaleId", saleId);
-                        using (var reader = cmdDetails.ExecuteReader())
+                        // 1. Revertir inventario antes de eliminar
+                        string getDetails = @"SELECT ProductId, Quantity FROM SaleDetails WHERE SaleId=@SaleId;";
+                        using (var cmd = new MySqlCommand(getDetails, conn, tran))
                         {
-                            var eggAdjustments = new List<(int productId, decimal qty)>();
-                            while (reader.Read())
+                            cmd.Parameters.AddWithValue("@SaleId", saleId);
+                            using (var reader = cmd.ExecuteReader())
                             {
-                                int pid = Convert.ToInt32(reader["ProductId"]);
-                                decimal qty = Convert.ToDecimal(reader["Quantity"]);
-                                if (IsEggProduct(pid, conn, tran))
-                                    eggAdjustments.Add((pid, qty));
-                            }
-                            reader.Close();
+                                while (reader.Read())
+                                {
+                                    int productId = reader.GetInt32("ProductId");
+                                    int qty = reader.GetInt32("Quantity");
 
-                            foreach (var adj in eggAdjustments)
-                            {
-                                string updateInventory = @"
-                                    UPDATE EggInventory
-                                    SET Quantity = Quantity + @Quantity, LastUpdated=@LastUpdated
-                                    WHERE ProductId=@ProductId";
-                                var cmdInv = new MySqlCommand(updateInventory, conn, tran);
-                                cmdInv.Parameters.AddWithValue("@Quantity", adj.qty);
-                                cmdInv.Parameters.AddWithValue("@LastUpdated", DateTime.Now);
-                                cmdInv.Parameters.AddWithValue("@ProductId", adj.productId);
-                                cmdInv.ExecuteNonQuery();
+                                    string revertInv = @"UPDATE EggInventory
+                                                     SET Quantity = Quantity + @Qty, LastUpdated = NOW()
+                                                     WHERE ProductId=@ProductId;";
+                                    using (var cmd2 = new MySqlCommand(revertInv, conn, tran))
+                                    {
+                                        cmd2.Parameters.AddWithValue("@Qty", qty);
+                                        cmd2.Parameters.AddWithValue("@ProductId", productId);
+                                        cmd2.ExecuteNonQuery();
+                                    }
+                                }
                             }
                         }
 
-                        // Eliminar detalles
-                        string deleteDetails = "DELETE FROM SaleDetails WHERE SaleId=@SaleId";
-                        var cmdDelDetails = new MySqlCommand(deleteDetails, conn, tran);
-                        cmdDelDetails.Parameters.AddWithValue("@SaleId", saleId);
-                        cmdDelDetails.ExecuteNonQuery();
+                        // 2. Eliminar detalles
+                        string deleteDetails = @"DELETE FROM SaleDetails WHERE SaleId=@SaleId;";
+                        using (var cmd = new MySqlCommand(deleteDetails, conn, tran))
+                        {
+                            cmd.Parameters.AddWithValue("@SaleId", saleId);
+                            cmd.ExecuteNonQuery();
+                        }
 
-                        // Eliminar venta
-                        string deleteSale = "DELETE FROM Sales WHERE Id=@Id";
-                        var cmdDelSale = new MySqlCommand(deleteSale, conn, tran);
-                        cmdDelSale.Parameters.AddWithValue("@Id", saleId);
-                        cmdDelSale.ExecuteNonQuery();
+                        // 3. Eliminar venta
+                        string deleteSale = @"DELETE FROM Sales WHERE Id=@Id;";
+                        using (var cmd = new MySqlCommand(deleteSale, conn, tran))
+                        {
+                            cmd.Parameters.AddWithValue("@Id", saleId);
+                            cmd.ExecuteNonQuery();
+                        }
 
                         tran.Commit();
                     }

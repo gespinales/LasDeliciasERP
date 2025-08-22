@@ -12,5 +12,8 @@ namespace LasDeliciasERP.Models
         public int ProductId { get; set; }
         public decimal Quantity { get; set; }
         public decimal Price { get; set; }
+
+        // Otros campos para formularios
+        public string DisplayName { get; set; }
     }
 }

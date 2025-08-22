@@ -11,5 +11,12 @@ namespace LasDeliciasERP.Models
         public DateTime SaleDate { get; set; }
         public int CustomerId { get; set; }
         public string Notes { get; set; }
+
+        // Otros campos para formularios
+        public string CustomerName { get; set; }
+        public List<SaleDetail> Details { get; set; } = new List<SaleDetail>();
+        public decimal TotalQuantity { get; set; }
+        public decimal TotalAmount { get; set; }
+
     }
 }

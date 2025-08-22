@@ -2,52 +2,63 @@
     AutoEventWireup="true" CodeBehind="Sales.aspx.cs" Inherits="LasDeliciasERP.Pages.Sales.Sales" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-     <!-- JS para actualizar precio -->
- <script type="text/javascript">
-     $(document).ready(function () {
-         $("#<%= btnAddProduct.ClientID %>").click(function (e) {
-            let cantidad = $("#<%= txtQuantity.ClientID %>").val();
-            if (!cantidad || parseFloat(cantidad) <= 0) {
-                e.preventDefault(); // Evita el postback
 
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Cantidad requerida',
-                    text: 'Por favor ingrese una cantidad válida antes de agregar el producto.',
-                    confirmButtonText: 'Entendido',
-                    confirmButtonColor: '#3085d6'
-                });
-
-                return false;
-            }
+    <!-- JS para validar cantidad y actualizar precio -->
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#<%= btnAddProduct.ClientID %>").click(function (e) {
+                let cantidad = $("#<%= txtQuantity.ClientID %>").val();
+                if (!cantidad || parseFloat(cantidad) <= 0) {
+                    e.preventDefault(); // Evita el postback
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cantidad requerida',
+                        text: 'Por favor ingrese una cantidad válida antes de agregar el producto.',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    return false;
+                }
+            });
         });
-     });
 
-     // Diccionario JS con ProductId -> Price
-     var productPrices = {
-         <% 
-     var prices = (Dictionary<int, decimal>)Session["ProductPrices"];
-     if (prices != null)
-     {
-         foreach (var kv in prices)
-         {
-         %>
-                     '<%= kv.Key %>': <%= kv.Value.ToString("F2") %>,
-         <%      }
-     }
-         %>
-     };
+        window.onload = function () {
+            var ddlProducts = document.getElementById('<%= ddlProducts.ClientID %>');
+            var ddlUnit = document.getElementById('<%= ddlUnit.ClientID %>');
+            var ddlSize = document.getElementById('<%= ddlSize.ClientID %>');
+            var txtPrice = document.getElementById('<%= txtPrice.ClientID %>');
 
-     window.onload = function () {
-         var ddlProducts = document.getElementById('<%= ddlProducts.ClientID %>');
-         var txtPrice = document.getElementById('<%= txtPrice.ClientID %>');
+        // Diccionario JS con ProductName|UnitId|SizeId -> Price
+        var productPrices = {
+            <% 
+            var prices = (Dictionary<string, decimal>)Session["ProductPrices"];
+            if (prices != null)
+            {
+                foreach (var kv in prices)
+                {
+            %>
+            '<%= kv.Key %>': <%= kv.Value.ToString("F2") %>,
+            <%      
+                }
+            }
+            %>
+            };
 
-         ddlProducts.addEventListener('change', function () {
-             var productId = ddlProducts.value;
-             txtPrice.value = productPrices[productId] || '';
-         });
-     };
- </script>
+            function updatePrice() {
+                var productName = ddlProducts.options[ddlProducts.selectedIndex].text;
+                var unitId = ddlUnit.value;
+                var sizeId = ddlSize.value;
+
+                var key = productName + '|' + unitId + '|' + sizeId;
+
+                txtPrice.value = productPrices[key] !== undefined ? productPrices[key] : '';
+            }
+
+            ddlProducts.addEventListener('change', updatePrice);
+            ddlUnit.addEventListener('change', updatePrice);
+            ddlSize.addEventListener('change', updatePrice);
+        };
+    </script>
 
     <div class="card shadow-sm p-4">
         <h2 class="mb-4" id="formTitle" runat="server">Registrar Venta de Productos</h2>
@@ -68,13 +79,28 @@
 
         <!-- Selección de productos -->
         <div class="row mb-3">
-            <div class="col-md-6">
+            <!-- Producto -->
+            <div class="col-md-4">
                 <asp:DropDownList ID="ddlProducts" runat="server" CssClass="form-select" />
             </div>
-            <div class="col-md-3">
+
+            <!-- Unidad -->
+            <div class="col-md-2">
+                <asp:DropDownList ID="ddlUnit" runat="server" CssClass="form-select" />
+            </div>
+
+            <!-- Tamaño de huevo -->
+            <div class="col-md-2">
+                <asp:DropDownList ID="ddlSize" runat="server" CssClass="form-select" />
+            </div>
+
+            <!-- Cantidad -->
+            <div class="col-md-2">
                 <asp:TextBox ID="txtQuantity" runat="server" CssClass="form-control" placeholder="Cantidad" />
             </div>
-            <div class="col-md-3">
+
+            <!-- Precio -->
+            <div class="col-md-2">
                 <asp:TextBox ID="txtPrice" runat="server" CssClass="form-control" ReadOnly="true" placeholder="Precio" />
             </div>
         </div>
@@ -93,8 +119,9 @@
             <Columns>
                 <asp:BoundField DataField="ProductId" HeaderText="ID" ItemStyle-CssClass="text-center" Visible="false" />
                 <asp:BoundField DataField="ProductName" HeaderText="Producto" />
-                <asp:BoundField DataField="Quantity" HeaderText="Cantidad" ItemStyle-CssClass="text-center" />
                 <asp:BoundField DataField="UnitName" HeaderText="Unidad" ItemStyle-CssClass="text-center" />
+                <asp:BoundField DataField="EggSizeName" HeaderText="Tamaño" ItemStyle-CssClass="text-center" />
+                <asp:BoundField DataField="Quantity" HeaderText="Cantidad" ItemStyle-CssClass="text-center" />
                 <asp:BoundField DataField="Price" HeaderText="Precio" DataFormatString="{0:C}" ItemStyle-CssClass="text-center" />
 
                 <asp:TemplateField HeaderText="Acciones">
@@ -128,5 +155,4 @@
         </div>
     </div>
 
-   
 </asp:Content>

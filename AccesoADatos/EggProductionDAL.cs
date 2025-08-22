@@ -176,7 +176,7 @@ LEFT JOIN EggProductionDetail d ON ep.Id = d.EggProductionId
 LEFT JOIN Products p ON d.ProductId = p.Id
 LEFT JOIN EggType et ON p.EggTypeId = et.Id
 LEFT JOIN EggSize es ON p.EggSizeId = es.Id
-WHERE ep.Id = 1
+WHERE ep.Id = @ProductionId
 ORDER BY et.Name, es.Id";
 
                 using (var cmd = new MySqlCommand(query, conn))

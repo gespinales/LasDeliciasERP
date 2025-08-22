@@ -2,6 +2,7 @@
 using LasDeliciasERP.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI.WebControls;
 
 namespace LasDeliciasERP.Pages.Sales
@@ -11,7 +12,10 @@ namespace LasDeliciasERP.Pages.Sales
     {
         public int ProductId { get; set; }
         public string ProductName { get; set; }
+        public int UnitTypeId { get; set; }
         public string UnitName { get; set; }
+        public int EggSizeId { get; set; }
+        public string EggSizeName { get; set; }
         public decimal Price { get; set; }
         public decimal Quantity { get; set; }
     }
@@ -48,7 +52,6 @@ namespace LasDeliciasERP.Pages.Sales
         {
             if (!IsPostBack)
             {
-                // Limpiamos la sesión para iniciar fresco
                 Session["SaleProducts"] = null;
                 Session["SaleDetail"] = null;
 
@@ -82,20 +85,37 @@ namespace LasDeliciasERP.Pages.Sales
 
         private void LoadProducts()
         {
-            var products = dalProduct.GetAllWithUnitAndPrice();
+            var products = dalProduct.GetAllWithUnitAndPrice(); // traer ProductId, Name, UnitName, EggSizeName, Price
 
             ddlProducts.Items.Clear();
             ddlProducts.Items.Add(new ListItem("-- Seleccione Producto --", ""));
 
-            var productPrices = new Dictionary<int, decimal>();
+            ddlUnit.Items.Clear();
+            ddlUnit.Items.Add(new ListItem("-- Seleccione Unidad --", ""));
+
+            ddlSize.Items.Clear();
+            ddlSize.Items.Add(new ListItem("-- Seleccione Tamaño --", ""));
+
+            var productPrices = new Dictionary<string, decimal>();
 
             foreach (var p in products)
             {
-                string textProductUnit = $"{p.Name} ({p.UnitName})";
-                ListItem item = new ListItem(textProductUnit, p.Id.ToString());
-                ddlProducts.Items.Add(item);
+                // Producto único
+                if (!ddlProducts.Items.Cast<ListItem>().Any(i => i.Text == p.Name))
+                    ddlProducts.Items.Add(new ListItem(p.Name, p.Id.ToString()));
 
-                productPrices[p.Id] = p.Price;
+                // Unidad única
+                if (!ddlUnit.Items.Cast<ListItem>().Any(i => i.Text == p.UnitName))
+                    ddlUnit.Items.Add(new ListItem(p.UnitName, p.UnitTypeId.ToString()));
+
+                // Tamaño único
+                if (!ddlSize.Items.Cast<ListItem>().Any(i => i.Text == p.EggSizeName))
+                    ddlSize.Items.Add(new ListItem(p.EggSizeName, p.EggSizeId.ToString()));
+
+                // Diccionario JS: ProductName|UnitId|SizeId -> Price
+                string key = $"{p.Name}|{p.UnitTypeId}|{p.EggSizeId}";
+                if (!productPrices.ContainsKey(key))
+                    productPrices[key] = p.Price;
             }
 
             Session["ProductPrices"] = productPrices;
@@ -103,12 +123,23 @@ namespace LasDeliciasERP.Pages.Sales
 
         private void LoadSale(int saleId)
         {
+            // Esto lo puedes reemplazar con tu lógica real de carga desde DAL
             ddlCustomer.SelectedValue = "1";
             txtNotes.Text = "Notas de prueba";
 
             SaleProducts = new List<SaleProduct>
             {
-                new SaleProduct { ProductId = 1, ProductName = "Producto 1 (kg)", Quantity = 2, UnitName = "kg", Price = 25.00M }
+                new SaleProduct
+                {
+                    ProductId = 1,
+                    ProductName = "Producto 1",
+                    UnitTypeId = 1,
+                    UnitName = "kg",
+                    EggSizeId = 1,
+                    EggSizeName = "M",
+                    Price = 25.00M,
+                    Quantity = 2
+                }
             };
 
             BindSaleProducts();
@@ -121,29 +152,34 @@ namespace LasDeliciasERP.Pages.Sales
 
         protected void btnAddProduct_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(ddlProducts.SelectedValue) || ddlProducts.SelectedValue == "" || string.IsNullOrEmpty(txtQuantity.Text))
+            if (string.IsNullOrEmpty(ddlProducts.SelectedValue) ||
+                string.IsNullOrEmpty(ddlUnit.SelectedValue) ||
+                string.IsNullOrEmpty(ddlSize.SelectedValue) ||
+                string.IsNullOrEmpty(txtQuantity.Text))
                 return;
 
             int productId = int.Parse(ddlProducts.SelectedValue);
             string productName = ddlProducts.SelectedItem.Text;
-
-            var productPrices = (Dictionary<int, decimal>)Session["ProductPrices"];
-            decimal price = productPrices.ContainsKey(productId) ? productPrices[productId] : 0;
+            int unitTypeId = int.Parse(ddlUnit.SelectedValue);
+            string unitName = ddlUnit.SelectedItem.Text;
+            int sizeId = int.Parse(ddlSize.SelectedValue);
+            string sizeName = ddlSize.SelectedItem.Text;
 
             if (!decimal.TryParse(txtQuantity.Text, out decimal quantity))
                 return;
 
-            string unitName = "";
-            int start = productName.IndexOf("(");
-            int end = productName.IndexOf(")");
-            if (start >= 0 && end > start)
-                unitName = productName.Substring(start + 1, end - start - 1);
+            var productPrices = (Dictionary<string, decimal>)Session["ProductPrices"];
+            string key = $"{productName}|{unitTypeId}|{sizeId}";
+            decimal price = productPrices.ContainsKey(key) ? productPrices[key] : 0;
 
             SaleProducts.Add(new SaleProduct
             {
                 ProductId = productId,
                 ProductName = productName,
+                UnitTypeId = unitTypeId,
                 UnitName = unitName,
+                EggSizeId = sizeId,
+                EggSizeName = sizeName,
                 Price = price,
                 Quantity = quantity
             });
@@ -156,9 +192,12 @@ namespace LasDeliciasERP.Pages.Sales
 
             BindSaleProducts();
 
+            // Limpiar campos
             txtQuantity.Text = "";
             txtPrice.Text = "";
             ddlProducts.SelectedIndex = 0;
+            ddlUnit.SelectedIndex = 0;
+            ddlSize.SelectedIndex = 0;
         }
 
         protected void gvProducts_RowDeleting(object sender, GridViewDeleteEventArgs e)
@@ -183,6 +222,7 @@ namespace LasDeliciasERP.Pages.Sales
                 SaleDate = DateTime.Now
             };
 
+            // Guardar en DB con DAL
             //if (hfAction.Value == "save")
             //    dalSales.Insert(sale, SaleDetail);
             //else if (hfAction.Value == "update")
