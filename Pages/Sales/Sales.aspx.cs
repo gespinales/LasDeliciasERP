@@ -44,10 +44,40 @@ namespace LasDeliciasERP.Pages.Sales
                     hfId.Value = id ?? "0";
                 }
 
-                if ((hfAction.Value == "update" || 
-                    hfAction.Value == "delete") && 
+                if ((hfAction.Value == "update" ||
+                    hfAction.Value == "delete") &&
                     hfId.Value != "0")
+                {
                     LoadSale(int.Parse(hfId.Value));
+
+                    // Bloquear campos si es eliminación
+                    if (hfAction.Value == "delete")
+                    {
+                        ddlCustomer.Enabled = false;
+                        ddlProducts.Enabled = false;
+                        ddlUnit.Enabled = false;
+                        ddlSize.Enabled = false;
+                        txtQuantity.ReadOnly = true;
+                        txtPrice.ReadOnly = true;
+                        txtSalePrice.ReadOnly = true;
+                        txtNotes.ReadOnly = true;
+                        btnAddProduct.Enabled = false;
+
+                        // Cambiar título del formulario
+                        formTitle.InnerText = "Eliminar venta";
+
+                        // Opcional: cambiar texto del botón de guardar
+                        btnSave.Text = "Eliminar";
+                    }
+                    else
+                    {
+                        // Cambiar título del formulario
+                        formTitle.InnerText = "Modificar venta";
+
+                        // Opcional: cambiar texto del botón de guardar
+                        btnSave.Text = "Modificar";
+                    }                   
+                }
             }
         }
 
@@ -208,6 +238,19 @@ namespace LasDeliciasERP.Pages.Sales
             SaleDetail.RemoveAt(index);
             BindSaleProducts();
         }
+        protected void gvProducts_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                LinkButton btnDelete = (LinkButton)e.Row.FindControl("btnDelete");
+                if (btnDelete != null && hfAction.Value == "delete")
+                {
+                    btnDelete.Enabled = false;
+                    btnDelete.Attributes["onclick"] = "return false;"; 
+                    btnDelete.CssClass = "btn btn-secondary btn-sm";   
+                }
+            }
+        }
 
         private void BindSaleProducts()
         {
@@ -217,46 +260,60 @@ namespace LasDeliciasERP.Pages.Sales
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
-            // Validar que se haya seleccionado un cliente
-            if (string.IsNullOrEmpty(ddlCustomer.SelectedValue))
+            string action = hfAction.Value;
+
+            // Validaciones solo para save/update
+            if (action == "save" || action == "update")
             {
-                // Mostrar alerta
-                ClientScript.RegisterStartupScript(this.GetType(), "alert",
-                    "Swal.fire({icon:'warning',title:'Cliente requerido',text:'Por favor seleccione un cliente antes de guardar.',confirmButtonText:'Entendido',confirmButtonColor:'#3085d6'});", true);
-                return; // Salir sin guardar
+                // Validar que se haya seleccionado un cliente
+                if (string.IsNullOrEmpty(ddlCustomer.SelectedValue))
+                {
+                    ClientScript.RegisterStartupScript(this.GetType(), "alert",
+                        "Swal.fire({icon:'warning',title:'Cliente requerido',text:'Por favor seleccione un cliente antes de guardar.',confirmButtonText:'Entendido',confirmButtonColor:'#3085d6'});", true);
+                    return;
+                }
+
+                // Validar que haya productos agregados
+                if (SaleDetail == null || SaleDetail.Count == 0)
+                {
+                    ClientScript.RegisterStartupScript(this.GetType(), "alert",
+                        "Swal.fire({icon:'warning',title:'Productos requeridos',text:'Debe agregar al menos un producto antes de guardar.',confirmButtonText:'Entendido',confirmButtonColor:'#3085d6'});", true);
+                    return;
+                }
             }
 
-            // Validar que haya productos agregados
-            if (SaleDetail == null || SaleDetail.Count == 0)
-            {
-                ClientScript.RegisterStartupScript(this.GetType(), "alert",
-                    "Swal.fire({icon:'warning',title:'Productos requeridos',text:'Debe agregar al menos un producto antes de guardar.',confirmButtonText:'Entendido',confirmButtonColor:'#3085d6'});", true);
-                return;
-            }
+            int saleId = string.IsNullOrEmpty(hfId.Value) ? 0 : int.Parse(hfId.Value);
 
-            Sale sale = new Sale
+            if (action == "save")
             {
-                CustomerId = int.Parse(ddlCustomer.SelectedValue),
-                Notes = txtNotes.Text,
-                SaleDate = DateTime.Now,
-                Details = SaleDetail
-            };
-
-            // Guardar en DB con DAL
-            if (hfAction.Value == "save")
+                Sale sale = new Sale
+                {
+                    CustomerId = int.Parse(ddlCustomer.SelectedValue),
+                    Notes = txtNotes.Text,
+                    SaleDate = DateTime.Now,
+                    Details = SaleDetail
+                };
                 dalSales.Insert(sale);
-            else if (hfAction.Value == "update")
+            }
+            else if (action == "update")
             {
-                int saleId = int.Parse(hfId.Value);
-                sale.Id = saleId;
+                Sale sale = new Sale
+                {
+                    Id = saleId,
+                    CustomerId = int.Parse(ddlCustomer.SelectedValue),
+                    Notes = txtNotes.Text,
+                    SaleDate = DateTime.Now,
+                    Details = SaleDetail
+                };
                 dalSales.Update(sale);
             }
-            else if (hfAction.Value == "delete")
+            else if (action == "delete")
             {
-                int saleId = int.Parse(hfId.Value);
-                dalSales.Delete(saleId);
+                // Para delete necesitamos pasar los detalles actuales en memoria para revertir inventario
+                dalSales.Delete(saleId, SaleDetail);
             }
 
+            // Limpiar sesión y redirigir
             Session["SaleProducts"] = null;
             Session["SaleDetail"] = null;
             Response.Redirect("SalesList.aspx");

@@ -135,7 +135,8 @@
         <!-- Productos agregados -->
         <asp:GridView ID="gvProducts" runat="server" AutoGenerateColumns="false"
             CssClass="table table-striped table-hover align-middle text-center mt-3"
-            OnRowDeleting="gvProducts_RowDeleting">
+            OnRowDeleting="gvProducts_RowDeleting"
+            OnRowDataBound="gvProducts_RowDataBound">
             <Columns>
                 <asp:BoundField DataField="ProductId" HeaderText="ID" Visible="false" />
                 <asp:BoundField DataField="ProductName" HeaderText="Producto" />

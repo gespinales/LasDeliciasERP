@@ -129,24 +129,24 @@ namespace LasDeliciasERP.AccesoADatos
                 conn.Open();
 
                 string query = @"
-            SELECT 
-                s.Id, s.SaleDate, s.Notes, s.CustomerId,
-                c.Name AS CustomerName,
-
-                d.Id AS DetailId, d.ProductId, d.Quantity, d.Price, d.SalePrice,
-                p.Name AS ProductName,
-                ut.Name AS UnitName,
-                es.Name AS EggSizeName,
-                et.Name AS EggTypeName
-            FROM Sales s
-            JOIN Customer c ON s.CustomerId = c.Id
-            LEFT JOIN SaleDetails d ON s.Id = d.SaleId
-            LEFT JOIN Products p ON d.ProductId = p.Id
-            LEFT JOIN UnitTypes ut ON p.UnitTypeId = ut.Id
-            LEFT JOIN EggSize es ON p.EggSizeId = es.Id
-            LEFT JOIN EggType et ON p.EggTypeId = et.Id
-            WHERE s.Id = @SaleId;
-        ";
+    SELECT 
+        s.Id, s.SaleDate, s.Notes, s.CustomerId,
+        c.Name AS CustomerName,
+        d.Id AS DetailId, d.ProductId, d.Quantity, d.Price, d.SalePrice,
+        p.Name AS ProductName,
+        p.UnitTypeId,
+        ut.Name AS UnitName,
+        es.Name AS EggSizeName,
+        et.Name AS EggTypeName
+    FROM Sales s
+    JOIN Customer c ON s.CustomerId = c.Id
+    LEFT JOIN SaleDetails d ON s.Id = d.SaleId
+    LEFT JOIN Products p ON d.ProductId = p.Id
+    LEFT JOIN UnitTypes ut ON p.UnitTypeId = ut.Id
+    LEFT JOIN EggSize es ON p.EggSizeId = es.Id
+    LEFT JOIN EggType et ON p.EggTypeId = et.Id
+    WHERE s.Id = @SaleId;
+";
 
                 using (var cmd = new MySqlCommand(query, conn))
                 {
@@ -176,6 +176,7 @@ namespace LasDeliciasERP.AccesoADatos
                                     Id = reader.GetInt32("DetailId"),
                                     ProductId = reader.GetInt32("ProductId"),
                                     ProductName = reader.GetString("EggTypeName"),
+                                    UnitTypeId = reader.GetInt32("UnitTypeId"),
                                     UnitName = reader.GetString("UnitName"),
                                     EggSizeName = reader.GetString("EggSizeName"),
                                     Quantity = reader.GetDecimal("Quantity"),
@@ -240,51 +241,8 @@ namespace LasDeliciasERP.AccesoADatos
                             int conversionFactor = GetConversionFactor(detail.UnitTypeId);
                             decimal qtyToDiscount = detail.Quantity * conversionFactor;
 
-                            // Diccionario que mapea los productos de huevos al ProductId de inventario
-                            // Key = combinación ProductoId/Unidad/Tamaño o simplemente ProductId original
-                            // Value = ProductId en inventario (solo unidades)
-                            var eggProductMap = new Dictionary<int, int>
-                            {
-                                // Huevos blancos S para todas las unidades de medida se juntan a Huevo blanco S unidad
-                                { 1, 9 }, // 1 = Producto huevo blanco S - Caja -> inventario Id 9
-                                { 5, 9 }, // 5 = Producto huevo blanco S - Cartón -> inventario Id 9
-                                { 9, 9 }, // 9 = Producto huevo blanco S - Unidad -> inventario Id 9
-
-                                // Huevos blancos M para todas las unidades de medida se juntan a Huevo blanco S unidad
-                                { 2, 10 }, // 2 = Producto huevo blanco M - Caja -> inventario Id 10
-                                { 6, 10 }, // 6 = Producto huevo blanco M - Cartón -> inventario Id 10
-                                { 10, 10 }, // 10 = Producto huevo blanco M - Unidad -> inventario Id 10
-
-                                // Huevos blancos L para todas las unidades de medida se juntan a Huevo blanco S unidad
-                                { 3, 11 }, // 3 = Producto huevo blanco L - Caja -> inventario Id 11
-                                { 7, 11 }, // 7 = Producto huevo blanco L - Cartón -> inventario Id 11
-                                { 11, 11 }, // 11 = Producto huevo blanco L - Unidad -> inventario Id 11
-
-                                // Huevos blancos XL para todas las unidades de medida se juntan a Huevo blanco S unidad
-                                { 4, 12 }, // 4 = Producto huevo blanco XL - Caja -> inventario Id 12
-                                { 8, 12 }, // 8 = Producto huevo blanco XL - Cartón -> inventario Id 12
-                                { 12, 12 }, // 12 = Producto huevo blanco XL - Unidad -> inventario Id 12
-
-                                // Huevos marrones S para todas las unidades de medida se juntan a Huevo marrones S unidad
-                                { 13, 21 }, // 13 = Producto huevo marrones S - Caja -> inventario Id 21
-                                { 17, 21 }, // 17 = Producto huevo marrones S - Cartón -> inventario Id 21
-                                { 21, 21 }, // 21 = Producto huevo marrones S - Unidad -> inventario Id 21
-
-                                // Huevos marrones M para todas las unidades de medida se juntan a Huevo marrones S unidad
-                                { 14, 22 }, // 14 = Producto huevo marrones M - Caja -> inventario Id 22
-                                { 18, 22 }, // 18 = Producto huevo marrones M - Cartón -> inventario Id 22
-                                { 22, 22 }, // 22 = Producto huevo marrones M - Unidad -> inventario Id 22
-
-                                // Huevos marrones L para todas las unidades de medida se juntan a Huevo marrones S unidad
-                                { 15, 23 }, // 15 = Producto huevo marrones L - Caja -> inventario Id 23
-                                { 19, 23 }, // 19 = Producto huevo marrones L - Cartón -> inventario Id 23
-                                { 23, 23 }, // 23 = Producto huevo marrones L - Unidad -> inventario Id 23
-
-                                // Huevos marrones XL para todas las unidades de medida se juntan a Huevo marrones S unidad
-                                { 16, 24 }, // 16 = Producto huevo marrones XL - Caja -> inventario Id 24
-                                { 20, 24 }, // 20 = Producto huevo marrones XL - Cartón -> inventario Id 24
-                                { 24, 24 }, // 24 = Producto huevo marrones XL - Unidad -> inventario Id 24                                    
-                            };
+                            // Diccionario de mapeo de inventario
+                            var eggProductMap = GetEggProductMap();
 
                             // Determinar el ProductId que realmente existe en inventario
                             int inventoryProductId = eggProductMap.ContainsKey(detail.ProductId)
@@ -317,20 +275,10 @@ namespace LasDeliciasERP.AccesoADatos
             }
         }
 
-        private int GetConversionFactor(int unitTypeId)
-        {
-            // Aquí mapeas los IDs reales de tu tabla UnitTypes
-            switch (unitTypeId)
-            {
-                case 1: return UnitConversion.Box;     // Caja
-                case 2: return UnitConversion.Carton;  // Cartón
-                case 3: return UnitConversion.Egg;     // Unidad
-                case 4: return UnitConversion.Dozen;   // Docena
-                default: return 1; // fallback
-            }
-        }
         public void Update(Sale sale)
         {
+            var eggProductMap = GetEggProductMap();
+
             using (var conn = new MySqlConnection(connString))
             {
                 conn.Open();
@@ -338,7 +286,7 @@ namespace LasDeliciasERP.AccesoADatos
                 {
                     try
                     {
-                        // 1. Actualizar encabezado de la venta
+                        // Actualizar encabezado de la venta
                         string updateSale = @"
                     UPDATE Sales 
                     SET SaleDate=@SaleDate, CustomerId=@CustomerId, Notes=@Notes
@@ -352,20 +300,47 @@ namespace LasDeliciasERP.AccesoADatos
                             cmd.ExecuteNonQuery();
                         }
 
-                        // 2. Revertir inventario con los detalles actuales (en lote)
-                        string revertInv = @"
-                    UPDATE EggInventory e
-                    JOIN SaleDetails d ON e.ProductId = d.ProductId
-                    SET e.Quantity = e.Quantity + d.Quantity,
-                        e.LastUpdated = NOW()
-                    WHERE d.SaleId = @SaleId;";
-                        using (var cmd = new MySqlCommand(revertInv, conn, tran))
+                        // Obtener detalles antiguos
+                        string getOldDetails = @"SELECT ProductId, Quantity FROM SaleDetails WHERE SaleId=@SaleId;";
+                        var oldDetails = new List<(int ProductId, decimal Quantity)>();
+                        using (var cmd = new MySqlCommand(getOldDetails, conn, tran))
                         {
                             cmd.Parameters.AddWithValue("@SaleId", sale.Id);
-                            cmd.ExecuteNonQuery();
+                            using (var reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    oldDetails.Add((
+                                        reader.GetInt32("ProductId"),
+                                        reader.GetDecimal("Quantity")
+                                    ));
+                                }
+                            }
                         }
 
-                        // 3. Eliminar detalles anteriores
+                        // Revertir inventario de detalles antiguos
+                        foreach (var d in oldDetails)
+                        {
+                            // Usar unitTypeId desde el objeto SaleDetail en memoria
+                            var detailInMemory = sale.Details.FirstOrDefault(x => x.ProductId == d.ProductId);
+                            int conversionFactor = detailInMemory != null ? GetConversionFactor(detailInMemory.UnitTypeId) : 1;
+                            decimal qtyToReturn = d.Quantity * conversionFactor;
+
+                            int inventoryProductId = eggProductMap.ContainsKey(d.ProductId) ? eggProductMap[d.ProductId] : d.ProductId;
+
+                            string revertInv = @"
+                        UPDATE EggInventory
+                        SET Quantity = Quantity + @Qty, LastUpdated = NOW()
+                        WHERE ProductId = @ProductId;";
+                            using (var cmd = new MySqlCommand(revertInv, conn, tran))
+                            {
+                                cmd.Parameters.AddWithValue("@Qty", qtyToReturn);
+                                cmd.Parameters.AddWithValue("@ProductId", inventoryProductId);
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+
+                        // Eliminar detalles antiguos
                         string deleteDetails = @"DELETE FROM SaleDetails WHERE SaleId=@SaleId;";
                         using (var cmd = new MySqlCommand(deleteDetails, conn, tran))
                         {
@@ -373,44 +348,37 @@ namespace LasDeliciasERP.AccesoADatos
                             cmd.ExecuteNonQuery();
                         }
 
-                        // 4. Insertar nuevos detalles en lote
-                        if (sale.Details.Any())
+                        // Insertar nuevos detalles y actualizar inventario
+                        foreach (var detail in sale.Details)
                         {
-                            var insertSql = new StringBuilder();
-                            insertSql.Append("INSERT INTO SaleDetails (SaleId, ProductId, Quantity, Price, SalePrice) VALUES ");
-
-                            var values = new List<string>();
-                            int idx = 0;
-                            var cmd = new MySqlCommand();
-                            cmd.Connection = conn;
-                            cmd.Transaction = tran;
-
-                            foreach (var detail in sale.Details)
+                            // Insertar detalle (sin UnitTypeId)
+                            string insertDetail = @"
+                        INSERT INTO SaleDetails (SaleId, ProductId, Quantity, Price, SalePrice)
+                        VALUES (@SaleId, @ProductId, @Quantity, @Price, @SalePrice);";
+                            using (var cmd = new MySqlCommand(insertDetail, conn, tran))
                             {
-                                values.Add($"(@SaleId, @ProductId{idx}, @Quantity{idx}, @Price{idx}, @SalePrice{idx})");
-                                cmd.Parameters.AddWithValue($"@ProductId{idx}", detail.ProductId);
-                                cmd.Parameters.AddWithValue($"@Quantity{idx}", detail.Quantity);
-                                cmd.Parameters.AddWithValue($"@Price{idx}", detail.Price);
-                                cmd.Parameters.AddWithValue($"@SalePrice{idx}", detail.SalePrice);
-                                idx++;
+                                cmd.Parameters.AddWithValue("@SaleId", sale.Id);
+                                cmd.Parameters.AddWithValue("@ProductId", detail.ProductId);
+                                cmd.Parameters.AddWithValue("@Quantity", detail.Quantity);
+                                cmd.Parameters.AddWithValue("@Price", detail.Price);
+                                cmd.Parameters.AddWithValue("@SalePrice", detail.SalePrice);
+                                cmd.ExecuteNonQuery();
                             }
 
-                            insertSql.Append(string.Join(",", values));
-                            cmd.Parameters.AddWithValue("@SaleId", sale.Id);
-                            cmd.CommandText = insertSql.ToString();
-                            cmd.ExecuteNonQuery();
+                            // Actualizar inventario
+                            int conversionFactor = GetConversionFactor(detail.UnitTypeId);
+                            decimal qtyToDeduct = detail.Quantity * conversionFactor;
+                            int inventoryProductId = eggProductMap.ContainsKey(detail.ProductId) ? eggProductMap[detail.ProductId] : detail.ProductId;
 
-                            // 5. Actualizar inventario en lote con JOIN
                             string updateInv = @"
-                        UPDATE EggInventory e
-                        JOIN SaleDetails d ON e.ProductId = d.ProductId
-                        SET e.Quantity = e.Quantity - d.Quantity,
-                            e.LastUpdated = NOW()
-                        WHERE d.SaleId = @SaleId;";
-                            using (var cmdInv = new MySqlCommand(updateInv, conn, tran))
+                        UPDATE EggInventory
+                        SET Quantity = Quantity - @Qty, LastUpdated = NOW()
+                        WHERE ProductId = @ProductId;";
+                            using (var cmd = new MySqlCommand(updateInv, conn, tran))
                             {
-                                cmdInv.Parameters.AddWithValue("@SaleId", sale.Id);
-                                cmdInv.ExecuteNonQuery();
+                                cmd.Parameters.AddWithValue("@Qty", qtyToDeduct);
+                                cmd.Parameters.AddWithValue("@ProductId", inventoryProductId);
+                                cmd.ExecuteNonQuery();
                             }
                         }
 
@@ -425,8 +393,10 @@ namespace LasDeliciasERP.AccesoADatos
             }
         }
 
-        public void Delete(int saleId)
+        public void Delete(int saleId, List<SaleDetail> saleDetailsInMemory)
         {
+            var eggProductMap = GetEggProductMap();
+
             using (var conn = new MySqlConnection(connString))
             {
                 conn.Open();
@@ -434,41 +404,29 @@ namespace LasDeliciasERP.AccesoADatos
                 {
                     try
                     {
-                        // 1. Revertir inventario con los detalles actuales
-                        string getOldDetails = @"SELECT ProductId, Quantity FROM SaleDetails WHERE SaleId=@SaleId;";
-                        using (var cmd = new MySqlCommand(getOldDetails, conn, tran))
+                        // Revertir inventario según los detalles que vienen en memoria
+                        foreach (var detail in saleDetailsInMemory)
                         {
-                            cmd.Parameters.AddWithValue("@SaleId", saleId);
-                            using (var reader = cmd.ExecuteReader())
+                            int conversionFactor = GetConversionFactor(detail.UnitTypeId);
+                            decimal qtyToReturn = detail.Quantity * conversionFactor;
+
+                            int inventoryProductId = eggProductMap.ContainsKey(detail.ProductId)
+                                                        ? eggProductMap[detail.ProductId]
+                                                        : detail.ProductId;
+
+                            string revertInv = @"
+                        UPDATE EggInventory
+                        SET Quantity = Quantity + @Qty, LastUpdated = NOW()
+                        WHERE ProductId = @ProductId;";
+                            using (var cmd = new MySqlCommand(revertInv, conn, tran))
                             {
-                                var toRevert = new List<(int ProductId, decimal Qty)>();
-                                while (reader.Read())
-                                {
-                                    int productId = reader.GetInt32("ProductId");
-                                    decimal qty = reader.GetDecimal("Quantity");
-                                    toRevert.Add((productId, qty));
-                                }
-
-                                // Cerrar reader antes de ejecutar otros comandos
-                                reader.Close();
-
-                                foreach (var item in toRevert)
-                                {
-                                    string revertInv = @"
-                                UPDATE EggInventory
-                                SET Quantity = Quantity + @Qty, LastUpdated = NOW()
-                                WHERE ProductId=@ProductId;";
-                                    using (var cmd2 = new MySqlCommand(revertInv, conn, tran))
-                                    {
-                                        cmd2.Parameters.AddWithValue("@Qty", item.Qty);
-                                        cmd2.Parameters.AddWithValue("@ProductId", item.ProductId);
-                                        cmd2.ExecuteNonQuery();
-                                    }
-                                }
+                                cmd.Parameters.AddWithValue("@Qty", qtyToReturn);
+                                cmd.Parameters.AddWithValue("@ProductId", inventoryProductId);
+                                cmd.ExecuteNonQuery();
                             }
                         }
 
-                        // 2. Eliminar detalles de la venta
+                        // Eliminar detalles de la venta
                         string deleteDetails = @"DELETE FROM SaleDetails WHERE SaleId=@SaleId;";
                         using (var cmd = new MySqlCommand(deleteDetails, conn, tran))
                         {
@@ -476,7 +434,7 @@ namespace LasDeliciasERP.AccesoADatos
                             cmd.ExecuteNonQuery();
                         }
 
-                        // 3. Eliminar encabezado de la venta
+                        // Eliminar la venta
                         string deleteSale = @"DELETE FROM Sales WHERE Id=@SaleId;";
                         using (var cmd = new MySqlCommand(deleteSale, conn, tran))
                         {
@@ -494,5 +452,49 @@ namespace LasDeliciasERP.AccesoADatos
                 }
             }
         }
+
+        private int GetConversionFactor(int unitTypeId)
+        {
+            // Aquí mapeas los IDs reales de tu tabla UnitTypes
+            switch (unitTypeId)
+            {
+                case 1: return UnitConversion.Box;     // Caja
+                case 2: return UnitConversion.Carton;  // Cartón
+                case 3: return UnitConversion.Egg;     // Unidad
+                case 4: return UnitConversion.Dozen;   // Docena
+                default: return 1; // fallback
+            }
+        }
+
+        private Dictionary<int, int> GetEggProductMap()
+        {
+            return new Dictionary<int, int>
+            {
+                // Huevos blancos S para todas las unidades de medida se juntan a Huevo blanco S unidad
+                { 1, 9 }, { 5, 9 }, { 9, 9 },
+
+                // Huevos blancos M
+                { 2, 10 }, { 6, 10 }, { 10, 10 },
+
+                // Huevos blancos L
+                { 3, 11 }, { 7, 11 }, { 11, 11 },
+
+                // Huevos blancos XL
+                { 4, 12 }, { 8, 12 }, { 12, 12 },
+
+                // Huevos marrones S
+                { 13, 21 }, { 17, 21 }, { 21, 21 },
+
+                // Huevos marrones M
+                { 14, 22 }, { 18, 22 }, { 22, 22 },
+
+                // Huevos marrones L
+                { 15, 23 }, { 19, 23 }, { 23, 23 },
+
+                // Huevos marrones XL
+                { 16, 24 }, { 20, 24 }, { 24, 24 }
+            };
+        }       
+
     }
 }
