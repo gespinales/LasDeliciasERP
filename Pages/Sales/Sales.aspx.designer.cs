@@ -42,6 +42,15 @@ namespace LasDeliciasERP.Pages.Sales
         protected global::System.Web.UI.WebControls.HiddenField hfAction;
 
         /// <summary>
+        /// GridViewEggInventory control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView GridViewEggInventory;
+
+        /// <summary>
         /// ddlCustomer control.
         /// </summary>
         /// <remarks>
@@ -103,6 +112,15 @@ namespace LasDeliciasERP.Pages.Sales
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtPrice;
+
+        /// <summary>
+        /// txtSalePrice control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtSalePrice;
 
         /// <summary>
         /// btnAddProduct control.

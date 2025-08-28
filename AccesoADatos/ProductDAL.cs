@@ -36,7 +36,7 @@ namespace LasDeliciasERP.AccesoADatos
             return list;
         }
 
-        public List<dynamic> GetAllWithUnitAndPrice()
+        public List<dynamic> GetAllEggsWithUnitAndPrice()
         {
             var list = new List<dynamic>();
             using (var conn = new MySqlConnection(connString))
@@ -44,22 +44,25 @@ namespace LasDeliciasERP.AccesoADatos
                 conn.Open();
 
                 string sql = @"
-            SELECT 
-                p.Id, 
-                p.Name, 
-                p.Notes, 
-                p.UnitTypeId,
-                ut.Name AS UnitName,
-                p.EggSizeId,
-                es.Name AS EggSizeName,
-                pp.Price
-            FROM Products p
-            LEFT JOIN UnitTypes ut ON p.UnitTypeId = ut.Id
-            LEFT JOIN EggSize es ON p.EggSizeId = es.Id
-            LEFT JOIN ProductPrices pp 
-                ON pp.ProductId = p.Id 
-                AND (pp.EndDate IS NULL OR pp.EndDate > NOW())
-            ORDER BY p.Name, ut.Name, es.Name";
+        SELECT 
+            p.Id, 
+            p.Name, 
+            p.Notes, 
+            p.UnitTypeId,
+            ut.Name AS UnitName,
+            p.EggSizeId,
+            es.Name AS EggSizeName,
+            p.EggTypeId,
+            et.Name AS EggTypeName,
+            pp.Price
+        FROM Products p
+        JOIN UnitTypes ut ON p.UnitTypeId = ut.Id
+        JOIN EggSize es ON p.EggSizeId = es.Id
+        JOIN EggType et ON p.EggTypeId = et.Id
+        JOIN ProductPrices pp 
+            ON pp.ProductId = p.Id 
+            AND (pp.EndDate IS NULL OR pp.EndDate > NOW())
+        ORDER BY p.Name, et.Name, ut.Name, es.Name";
 
                 using (var cmd = new MySqlCommand(sql, conn))
                 using (var reader = cmd.ExecuteReader())
@@ -69,12 +72,14 @@ namespace LasDeliciasERP.AccesoADatos
                         list.Add(new
                         {
                             Id = Convert.ToInt32(reader["Id"]),
-                            Name = reader["Name"].ToString(),
+                            Name = reader["EggTypeName"].ToString(),
                             Notes = reader["Notes"]?.ToString(),
                             UnitTypeId = reader["UnitTypeId"] != DBNull.Value ? Convert.ToInt32(reader["UnitTypeId"]) : 0,
                             UnitName = reader["UnitName"]?.ToString(),
                             EggSizeId = reader["EggSizeId"] != DBNull.Value ? Convert.ToInt32(reader["EggSizeId"]) : 0,
                             EggSizeName = reader["EggSizeName"]?.ToString(),
+                            EggTypeId = reader["EggTypeId"] != DBNull.Value ? Convert.ToInt32(reader["EggTypeId"]) : 0,
+                            EggTypeName = reader["EggTypeName"]?.ToString(),
                             Price = reader["Price"] != DBNull.Value ? Convert.ToDecimal(reader["Price"]) : 0m
                         });
                     }

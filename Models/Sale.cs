@@ -17,6 +17,7 @@ namespace LasDeliciasERP.Models
         public List<SaleDetail> Details { get; set; } = new List<SaleDetail>();
         public decimal TotalQuantity { get; set; }
         public decimal TotalAmount { get; set; }
+        public decimal TotalSaleAmount { get; set; }
 
     }
 }

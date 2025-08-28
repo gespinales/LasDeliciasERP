@@ -20,10 +20,15 @@
             <asp:BoundField DataField="CustomerName" HeaderText="Cliente" />
             <asp:BoundField DataField="SaleDate" HeaderText="Fecha" DataFormatString="{0:dd/MM/yyyy}" />
             <asp:BoundField DataField="Notes" HeaderText="Notas" />
+            <asp:BoundField DataField="TotalQuantity" HeaderText="Total Huevos" ItemStyle-CssClass="fw-bold" />
+            <asp:BoundField DataField="TotalAmount" HeaderText="Total Venta Estimada"
+                DataFormatString="{0:C}" ItemStyle-CssClass="fw-bold" />
+            <asp:BoundField DataField="TotalSaleAmount" HeaderText="Total Venta Real"
+                DataFormatString="{0:C}" ItemStyle-CssClass="fw-bold" />
 
             <asp:TemplateField HeaderText="Acciones">
                 <ItemTemplate>
-                    <a href='<%# "Sales.aspx?id=" + Eval("Id") + "&action=edit" %>'
+                    <a href='<%# "Sales.aspx?id=" + Eval("Id") + "&action=update" %>'
                         class="btn btn-warning btn-sm me-1">
                         <i class="bi bi-pencil-square"></i> Editar
                     </a>
