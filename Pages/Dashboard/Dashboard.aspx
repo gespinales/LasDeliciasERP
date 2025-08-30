@@ -68,7 +68,7 @@
 
                 <!-- Vacunas -->
                 <div class="col-md-4">
-                    <a href="Vaccines.aspx" class="text-decoration-none">
+                    <a href="../Vaccination/VaccinationScheduleList.aspx" class="text-decoration-none">
                         <div class="card text-white shadow-sm h-100 hover-shadow bg-success">
                             <div class="card-body">
                                 <i class="bi bi-heart-pulse-fill display-4"></i>
