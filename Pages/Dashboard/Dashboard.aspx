@@ -23,12 +23,12 @@
 
                 <!-- Gastos de Concentrado -->
                 <div class="col-md-4">
-                    <a href="FeedExpenses.aspx" class="text-decoration-none">
+                    <a href="../Inventory/InventoryPurchaseList.aspx" class="text-decoration-none">
                         <div class="card text-white shadow-sm h-100 hover-shadow bg-info">
                             <div class="card-body">
                                 <i class="bi bi-basket-fill display-4"></i>
-                                <h5 class="card-title mt-3">Gastos de Concentrado</h5>
-                                <p class="card-text">Registrar compras y gastos de alimentos para las gallinas.</p>
+                                <h5 class="card-title mt-3">Compras de insumos</h5>
+                                <p class="card-text">Registrar compras yde insumos para las gallinas y más.</p>
                             </div>
                         </div>
                     </a>

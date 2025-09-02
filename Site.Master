@@ -33,8 +33,8 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="FeedExpenses.aspx">
-                                <i class="bi bi-basket-fill"></i> Gastos de Concentrado
+                            <a class="nav-link" href="../Inventory/InventoryPurchaseList.aspx">
+                                <i class="bi bi-basket-fill"></i> Compras de insumos
                             </a>
                         </li>
                         <li class="nav-item">

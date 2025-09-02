@@ -179,6 +179,8 @@
     <Content Include="Pages\Dashboard\Dashboard.aspx" />
     <Content Include="Pages\EggProduction\EggProductionForm.aspx" />
     <Content Include="Pages\EggProduction\EggProductionList.aspx" />
+    <Content Include="Pages\Inventory\InventoryPurchase.aspx" />
+    <Content Include="Pages\Inventory\InventoryPurchaseList.aspx" />
     <Content Include="Pages\Sales\Sales.aspx" />
     <Content Include="Pages\Sales\SalesList.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
@@ -243,6 +245,9 @@
     <Content Include="Site.Mobile.Master" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccesoADatos\InventoryDAL.cs" />
+    <Compile Include="AccesoADatos\SupplierDAL.cs" />
+    <Compile Include="AccesoADatos\InventoryPurchaseDAL.cs" />
     <Compile Include="AccesoADatos\UnitTypeDAL.cs" />
     <Compile Include="AccesoADatos\ProductDAL.cs" />
     <Compile Include="AccesoADatos\SalesDAL.cs" />
@@ -260,6 +265,10 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Inventory.cs" />
+    <Compile Include="Models\InventoryPurchaseDetail.cs" />
+    <Compile Include="Models\Supplier.cs" />
+    <Compile Include="Models\InventoryPurchase.cs" />
     <Compile Include="Models\EggProductionDetail.cs" />
     <Compile Include="Models\Sale.cs" />
     <Compile Include="Models\SaleDetail.cs" />
@@ -346,6 +355,20 @@
     <Compile Include="Pages\EggProduction\EggProductionList.aspx.designer.cs">
       <DependentUpon>EggProductionList.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Pages\Inventory\InventoryPurchase.aspx.cs">
+      <DependentUpon>InventoryPurchase.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Inventory\InventoryPurchase.aspx.designer.cs">
+      <DependentUpon>InventoryPurchase.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Inventory\InventoryPurchaseList.aspx.cs">
+      <DependentUpon>InventoryPurchaseList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Inventory\InventoryPurchaseList.aspx.designer.cs">
+      <DependentUpon>InventoryPurchaseList.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Sales\Sales.aspx.cs">
       <DependentUpon>Sales.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -375,6 +398,8 @@
     <Compile Include="Site.Mobile.Master.designer.cs">
       <DependentUpon>Site.Mobile.Master</DependentUpon>
     </Compile>
+    <Compile Include="Utilities\ConversionFactor.cs" />
+    <Compile Include="Utilities\Maps.cs" />
     <Compile Include="Utilities\UnitConversion.cs" />
     <Compile Include="ViewSwitcher.ascx.cs">
       <DependentUpon>ViewSwitcher.ascx</DependentUpon>
