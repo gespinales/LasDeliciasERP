@@ -88,6 +88,44 @@ namespace LasDeliciasERP.AccesoADatos
             return list;
         }
 
+        public List<dynamic> GetAllProductsWithUnit()
+        {
+            var list = new List<dynamic>();
+
+            string sql = @"
+        SELECT 
+            p.Id, 
+            p.Name, 
+            p.UnitTypeId,
+            ut.Name AS UnitName
+        FROM Products p
+        JOIN UnitTypes ut ON p.UnitTypeId = ut.Id
+        WHERE p.ProductTypeId != 1
+        ORDER BY p.Name, ut.Name;";
+
+            using (var conn = new MySqlConnection(connString))
+            using (var cmd = new MySqlCommand(sql, conn))
+            {
+                conn.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new
+                        {
+                            Id = reader.GetInt32("Id"),
+                            Name = reader.GetString("Name"),
+                            UnitTypeId = reader.GetInt32("UnitTypeId"),
+                            UnitName = reader.GetString("UnitName")
+                        });
+                    }
+                }
+            }
+
+            return list;
+        }
+
+
         public List<UnitType> GetByProductId(int productId)
         {
             var list = new List<UnitType>();
@@ -207,32 +245,6 @@ namespace LasDeliciasERP.AccesoADatos
             return null;
         }
 
-        public List<Product> GetAllEggProducts()
-        {
-            var list = new List<Product>();
-            using (var conn = new MySqlConnection(connString))
-            {
-                conn.Open();
-                string sql = @"SELECT * FROM Products WHERE EggTypeId IS NOT NULL ORDER BY Name";
-                using (var cmd = new MySqlCommand(sql, conn))
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        list.Add(new Product
-                        {
-                            Id = Convert.ToInt32(reader["Id"]),
-                            Name = reader["Name"].ToString(),
-                            UnitTypeId = Convert.ToInt32(reader["UnitTypeId"]),
-                            EggTypeId = reader["EggTypeId"] != DBNull.Value ? Convert.ToInt32(reader["EggTypeId"]) : 0,
-                            Notes = reader["Notes"]?.ToString()
-                        });
-                    }
-                }
-            }
-            return list;
-        }
-
         public List<Product> GetAllEggProductsUnit()
         {
             var list = new List<Product>();
@@ -240,16 +252,17 @@ namespace LasDeliciasERP.AccesoADatos
             {
                 conn.Open();
                 string sql = @"
-            SELECT p.Id, p.Name, p.UnitTypeId, p.EggTypeId, p.Notes,
-                   et.Name AS EggTypeName,
-                   es.Name AS EggSizeName,
-                   CONCAT(et.Name, ' - ', es.Name) AS DisplayName
-            FROM Products p
-            JOIN EggType et ON p.EggTypeId = et.Id
-            JOIN EggSize es ON p.EggSizeId = es.Id
-            WHERE p.EggTypeId IS NOT NULL
-              AND p.UnitTypeId = 3
-            ORDER BY et.Name, es.Id";
+                SELECT p.Id, p.Name, p.UnitTypeId, p.EggTypeId, p.EggSizeId, p.Notes,
+                       et.Name AS EggTypeName,
+                       es.Name AS EggSizeName,
+                       CONCAT(et.Name, ' - ', es.Name) AS DisplayName
+                FROM Products p
+                JOIN EggType et ON p.EggTypeId = et.Id
+                JOIN EggSize es ON p.EggSizeId = es.Id
+                WHERE p.EggTypeId IS NOT NULL
+                  AND p.UnitTypeId = 3
+                  AND p.ProductTypeId = 1  -- 1 = Huevo
+                ORDER BY et.Name, es.Id";
 
                 using (var cmd = new MySqlCommand(sql, conn))
                 using (var reader = cmd.ExecuteReader())
@@ -268,82 +281,6 @@ namespace LasDeliciasERP.AccesoADatos
                 }
             }
             return list;
-        }
-
-        public int? GetProductIdByEggTypeAndSize(int eggTypeId, int eggSizeId)
-        {
-            using (var conn = new MySqlConnection(connString))
-            {
-                conn.Open();
-                string sql = @"
-            SELECT Id
-            FROM Products
-            WHERE EggTypeId = @EggTypeId
-              AND EggSizeId = @EggSizeId
-            LIMIT 1";
-
-                using (var cmd = new MySqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@EggTypeId", eggTypeId);
-                    cmd.Parameters.AddWithValue("@EggSizeId", eggSizeId);
-
-                    var result = cmd.ExecuteScalar();
-                    if (result != null && result != DBNull.Value)
-                        return Convert.ToInt32(result);
-                    else
-                        return null;
-                }
-            }
-        }
-
-        public void Insert(Product product)
-        {
-            using (var conn = new MySqlConnection(connString))
-            {
-                conn.Open();
-                string sql = @"INSERT INTO Products (Name, UnitTypeId, Notes)
-                               VALUES (@Name, @UnitTypeId, @Notes)";
-                using (var cmd = new MySqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Name", product.Name);
-                    cmd.Parameters.AddWithValue("@UnitTypeId", product.UnitTypeId);
-                    cmd.Parameters.AddWithValue("@Notes", (object)product.Notes ?? DBNull.Value);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        public void Update(Product product)
-        {
-            using (var conn = new MySqlConnection(connString))
-            {
-                conn.Open();
-                string sql = @"UPDATE Products 
-                               SET Name=@Name, UnitTypeId=@UnitTypeId, Notes=@Notes
-                               WHERE Id=@Id";
-                using (var cmd = new MySqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Id", product.Id);
-                    cmd.Parameters.AddWithValue("@Name", product.Name);
-                    cmd.Parameters.AddWithValue("@UnitTypeId", product.UnitTypeId);
-                    cmd.Parameters.AddWithValue("@Notes", (object)product.Notes ?? DBNull.Value);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        public void Delete(int id)
-        {
-            using (var conn = new MySqlConnection(connString))
-            {
-                conn.Open();
-                string sql = @"DELETE FROM Products WHERE Id=@Id";
-                using (var cmd = new MySqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    cmd.ExecuteNonQuery();
-                }
-            }
         }
     }
 }

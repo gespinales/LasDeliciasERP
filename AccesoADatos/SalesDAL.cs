@@ -12,6 +12,8 @@ namespace LasDeliciasERP.AccesoADatos
     public class SalesDAL
     {
         private string connString = ConfigurationManager.ConnectionStrings["EJDMDConn"].ConnectionString;
+        ConversionFactor objConversion = new ConversionFactor();
+        Maps objMaps = new Maps();
 
         public List<Sale> GetAllByDate(DateTime? startDate = null, DateTime? endDate = null)
         {
@@ -238,11 +240,11 @@ namespace LasDeliciasERP.AccesoADatos
 
                             // Calcular cantidad real a descontar
                             // Aquí asumimos que la conversión depende del ProductId
-                            int conversionFactor = GetConversionFactor(detail.UnitTypeId);
+                            int conversionFactor = objConversion.GetConversionFactor(detail.UnitTypeId);
                             decimal qtyToDiscount = detail.Quantity * conversionFactor;
 
                             // Diccionario de mapeo de inventario
-                            var eggProductMap = GetEggProductMap();
+                            var eggProductMap = objMaps.GetEggProductMap();
 
                             // Determinar el ProductId que realmente existe en inventario
                             int inventoryProductId = eggProductMap.ContainsKey(detail.ProductId)
@@ -277,7 +279,7 @@ namespace LasDeliciasERP.AccesoADatos
 
         public void Update(Sale sale)
         {
-            var eggProductMap = GetEggProductMap();
+            var eggProductMap = objMaps.GetEggProductMap();
 
             using (var conn = new MySqlConnection(connString))
             {
@@ -323,7 +325,7 @@ namespace LasDeliciasERP.AccesoADatos
                         {
                             // Usar unitTypeId desde el objeto SaleDetail en memoria
                             var detailInMemory = sale.Details.FirstOrDefault(x => x.ProductId == d.ProductId);
-                            int conversionFactor = detailInMemory != null ? GetConversionFactor(detailInMemory.UnitTypeId) : 1;
+                            int conversionFactor = detailInMemory != null ? objConversion.GetConversionFactor(detailInMemory.UnitTypeId) : 1;
                             decimal qtyToReturn = d.Quantity * conversionFactor;
 
                             int inventoryProductId = eggProductMap.ContainsKey(d.ProductId) ? eggProductMap[d.ProductId] : d.ProductId;
@@ -366,7 +368,7 @@ namespace LasDeliciasERP.AccesoADatos
                             }
 
                             // Actualizar inventario
-                            int conversionFactor = GetConversionFactor(detail.UnitTypeId);
+                            int conversionFactor = objConversion.GetConversionFactor(detail.UnitTypeId);
                             decimal qtyToDeduct = detail.Quantity * conversionFactor;
                             int inventoryProductId = eggProductMap.ContainsKey(detail.ProductId) ? eggProductMap[detail.ProductId] : detail.ProductId;
 
@@ -395,7 +397,7 @@ namespace LasDeliciasERP.AccesoADatos
 
         public void Delete(int saleId, List<SaleDetail> saleDetailsInMemory)
         {
-            var eggProductMap = GetEggProductMap();
+            var eggProductMap = objMaps.GetEggProductMap();
 
             using (var conn = new MySqlConnection(connString))
             {
@@ -404,10 +406,10 @@ namespace LasDeliciasERP.AccesoADatos
                 {
                     try
                     {
-                        // Revertir inventario según los detalles que vienen en memoria
+                        // Revertir inventario según los detalles que vienen en memoria                      
                         foreach (var detail in saleDetailsInMemory)
                         {
-                            int conversionFactor = GetConversionFactor(detail.UnitTypeId);
+                            int conversionFactor = objConversion.GetConversionFactor(detail.UnitTypeId);
                             decimal qtyToReturn = detail.Quantity * conversionFactor;
 
                             int inventoryProductId = eggProductMap.ContainsKey(detail.ProductId)
@@ -452,49 +454,5 @@ namespace LasDeliciasERP.AccesoADatos
                 }
             }
         }
-
-        private int GetConversionFactor(int unitTypeId)
-        {
-            // Aquí mapeas los IDs reales de tu tabla UnitTypes
-            switch (unitTypeId)
-            {
-                case 1: return UnitConversion.Box;     // Caja
-                case 2: return UnitConversion.Carton;  // Cartón
-                case 3: return UnitConversion.Egg;     // Unidad
-                case 4: return UnitConversion.Dozen;   // Docena
-                default: return 1; // fallback
-            }
-        }
-
-        private Dictionary<int, int> GetEggProductMap()
-        {
-            return new Dictionary<int, int>
-            {
-                // Huevos blancos S para todas las unidades de medida se juntan a Huevo blanco S unidad
-                { 1, 9 }, { 5, 9 }, { 9, 9 },
-
-                // Huevos blancos M
-                { 2, 10 }, { 6, 10 }, { 10, 10 },
-
-                // Huevos blancos L
-                { 3, 11 }, { 7, 11 }, { 11, 11 },
-
-                // Huevos blancos XL
-                { 4, 12 }, { 8, 12 }, { 12, 12 },
-
-                // Huevos marrones S
-                { 13, 21 }, { 17, 21 }, { 21, 21 },
-
-                // Huevos marrones M
-                { 14, 22 }, { 18, 22 }, { 22, 22 },
-
-                // Huevos marrones L
-                { 15, 23 }, { 19, 23 }, { 23, 23 },
-
-                // Huevos marrones XL
-                { 16, 24 }, { 20, 24 }, { 24, 24 }
-            };
-        }       
-
     }
 }

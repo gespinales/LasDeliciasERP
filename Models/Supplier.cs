@@ -5,13 +5,14 @@ using System.Web;
 
 namespace LasDeliciasERP.Models
 {
-    public class Product
+    public class Supplier
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int? EggTypeId { get; set; }
-        public int UnitTypeId { get; set; }
-        public int ProductTypeId { get; set; }
+        public string ContactName { get; set; }
+        public string Phone { get; set; }
+        public string Email { get; set; }
+        public string Address { get; set; }
         public string Notes { get; set; }
     }
 }

@@ -183,6 +183,9 @@
     <Content Include="Pages\Inventory\InventoryPurchaseList.aspx" />
     <Content Include="Pages\Sales\Sales.aspx" />
     <Content Include="Pages\Sales\SalesList.aspx" />
+    <Content Include="Pages\Vaccination\VaccinationRecord.aspx" />
+    <Content Include="Pages\Vaccination\VaccinationSchedule.aspx" />
+    <Content Include="Pages\Vaccination\VaccinationScheduleList.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -245,6 +248,9 @@
     <Content Include="Site.Mobile.Master" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccesoADatos\VaccinationRecordDAL.cs" />
+    <Compile Include="AccesoADatos\VaccineDAL.cs" />
+    <Compile Include="AccesoADatos\VaccinationScheduleDAL.cs" />
     <Compile Include="AccesoADatos\InventoryDAL.cs" />
     <Compile Include="AccesoADatos\SupplierDAL.cs" />
     <Compile Include="AccesoADatos\InventoryPurchaseDAL.cs" />
@@ -265,6 +271,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Vaccine.cs" />
+    <Compile Include="Models\VaccinationRecord.cs" />
+    <Compile Include="Models\VaccinationSchedule.cs" />
     <Compile Include="Models\Inventory.cs" />
     <Compile Include="Models\InventoryPurchaseDetail.cs" />
     <Compile Include="Models\Supplier.cs" />
@@ -382,6 +391,27 @@
     </Compile>
     <Compile Include="Pages\Sales\SalesList.aspx.designer.cs">
       <DependentUpon>SalesList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Vaccination\VaccinationRecord.aspx.cs">
+      <DependentUpon>VaccinationRecord.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Vaccination\VaccinationRecord.aspx.designer.cs">
+      <DependentUpon>VaccinationRecord.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Vaccination\VaccinationSchedule.aspx.cs">
+      <DependentUpon>VaccinationSchedule.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Vaccination\VaccinationSchedule.aspx.designer.cs">
+      <DependentUpon>VaccinationSchedule.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Vaccination\VaccinationScheduleList.aspx.cs">
+      <DependentUpon>VaccinationScheduleList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Vaccination\VaccinationScheduleList.aspx.designer.cs">
+      <DependentUpon>VaccinationScheduleList.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Site.Master.cs">

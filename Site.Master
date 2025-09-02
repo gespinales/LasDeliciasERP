@@ -38,7 +38,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="Vaccines.aspx">
+                            <a class="nav-link" href="../Vaccination/VaccinationScheduleList.aspx">
                                 <i class="bi bi-heart-pulse-fill"></i> Vacunas
                             </a>
                         </li>
