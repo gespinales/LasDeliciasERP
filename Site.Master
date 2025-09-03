@@ -57,6 +57,30 @@
                                 <li><a class="dropdown-item" href="../Bird/BirdDeathList.aspx"><i class="bi bi-x-circle-fill"></i> Decesos</a></li>
                                 <li><a class="dropdown-item" href="../Bird/BirdMovementReport.aspx"><i class="bi bi-arrow-left-right"></i> Reporte de movimientos</a></li>
                                 <li><a class="dropdown-item" href="../Bird/PopulationList.aspx"><i class="bi bi-people-fill"></i> Población</a></li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+                                <li><a class="dropdown-item" href="../Feeding/RegisterFeeding.aspx"><i class="bi bi-cup-fill"></i> Alimentación diaria</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Menú de Reportes -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-graph-up"></i> Reportes
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="../Reports/FoodProjection.aspx">
+                                        <i class="bi bi-bar-chart-fill"></i> Proyección de Alimento
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="../Reports/FeedingHistory.aspx">
+                                        <i class="bi bi-clock-history"></i> Historial de Alimentación
+                                    </a>
+                                </li>
+                                <!-- Puedes agregar más reportes aquí -->
                             </ul>
                         </li>
                     </ul>
