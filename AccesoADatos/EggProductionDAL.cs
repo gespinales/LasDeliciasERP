@@ -383,5 +383,66 @@ ORDER BY et.Name, es.Id";
                 cmdInsert.ExecuteNonQuery();
             }
         }
+
+        public List<EggLayingEfficiency> GetEfficiencyReport(string startDate = null, string endDate = null)
+        {
+            List<EggLayingEfficiency> list = new List<EggLayingEfficiency>();
+
+            using (MySqlConnection conn = new MySqlConnection(connString))
+            {
+                conn.Open();
+                string sql = @"
+            SELECT 
+                b.Id AS BarnId,
+                b.Name AS BarnName,
+                SUM(epd.Quantity) AS TotalEggs,
+                p.Quantity AS TotalBirds,
+                ep.ProductionDate
+            FROM eggproduction ep
+            INNER JOIN eggproductiondetail epd ON ep.Id = epd.EggProductionId
+            INNER JOIN barn b ON b.Id = ep.BarnId
+            INNER JOIN population p ON p.BarnId = b.Id
+            WHERE p.LastUpdated = (
+                SELECT MAX(p2.LastUpdated) FROM population p2 WHERE p2.BarnId = b.Id
+            )";
+
+                if (!string.IsNullOrEmpty(startDate))
+                    sql += " AND ep.ProductionDate >= @startDate";
+                if (!string.IsNullOrEmpty(endDate))
+                    sql += " AND ep.ProductionDate <= @endDate";
+
+                sql += " GROUP BY ep.ProductionDate, b.Id, b.Name, p.Quantity ORDER BY ep.ProductionDate DESC";
+
+                using (MySqlCommand cmd = new MySqlCommand(sql, conn))
+                {
+                    if (!string.IsNullOrEmpty(startDate))
+                        cmd.Parameters.AddWithValue("@startDate", startDate);
+                    if (!string.IsNullOrEmpty(endDate))
+                        cmd.Parameters.AddWithValue("@endDate", endDate);
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int totalBirds = reader.GetInt32("TotalBirds");
+                            int totalEggs = reader.GetInt32("TotalEggs");
+
+                            list.Add(new EggLayingEfficiency
+                            {
+                                BarnId = reader.GetInt32("BarnId"),
+                                BarnName = reader.GetString("BarnName"),
+                                TotalBirds = totalBirds,
+                                TotalEggs = totalEggs,
+                                EfficiencyPercentage = totalBirds > 0 ? Math.Round(((decimal)totalEggs / totalBirds) * 100, 2) : 0,
+                                ProductionDate = reader.GetDateTime("ProductionDate")
+                            });
+                        }
+                    }
+                }
+            }
+
+            return list;
+        }
+
     }
 }

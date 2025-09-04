@@ -182,6 +182,7 @@
     <Content Include="Pages\Feeding\RegisterFeeding.aspx" />
     <Content Include="Pages\Inventory\InventoryPurchase.aspx" />
     <Content Include="Pages\Inventory\InventoryPurchaseList.aspx" />
+    <Content Include="Pages\Reports\EggLayingEfficiency.aspx" />
     <Content Include="Pages\Reports\FoodProjection.aspx" />
     <Content Include="Pages\Sales\Sales.aspx" />
     <Content Include="Pages\Sales\SalesList.aspx" />
@@ -275,6 +276,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\EggLayingEfficiency.cs" />
     <Compile Include="Models\FeedingInfo.cs" />
     <Compile Include="Models\FeedingRecord.cs" />
     <Compile Include="Models\FoodProjection.cs" />
@@ -391,6 +393,13 @@
     </Compile>
     <Compile Include="Pages\Inventory\InventoryPurchaseList.aspx.designer.cs">
       <DependentUpon>InventoryPurchaseList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Reports\EggLayingEfficiency.aspx.cs">
+      <DependentUpon>EggLayingEfficiency.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Reports\EggLayingEfficiency.aspx.designer.cs">
+      <DependentUpon>EggLayingEfficiency.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Reports\FoodProjection.aspx.cs">
       <DependentUpon>FoodProjection.aspx</DependentUpon>
